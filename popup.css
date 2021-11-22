@@ -1,0 +1,50 @@
+*{
+    padding: 0px;
+    margin: 0px;
+    box-sizing: border-box;
+}
+input:focus, button:focus{
+    border: 1px solid #000;
+    outline: none;
+}
+.popup-body{
+    width: 200px;
+    padding: 10px;
+}
+#user-settings{
+    margin-bottom: 15px;
+}
+.action-buttons{    
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.action-buttons button{
+    width: 100%;
+    border: none;
+    background-color: #eee;
+    padding: 5px 10px;
+    border-right: 1px solid #bbb;
+    cursor: pointer;
+}
+.action-buttons button:hover{
+    background-color: #ddd;
+}
+.action-buttons button:last-child{
+    border-right: 0px;
+}
+.btn-active{
+    background-color: #222;
+}
+.form .form-element{
+    margin-top: 10px;
+}
+.form .form-element:first-child{
+    margin-top: 0px;
+}
+.form input{
+    padding: 2px;
+    width: 100%;
+    border: 1px solid #ccc;
+}

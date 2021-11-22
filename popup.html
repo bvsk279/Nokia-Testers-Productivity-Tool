@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nokia Testers</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <script src="./content-includes/jquery.js"></script>
+    <div class="popup-body browser-extention">
+        <div class="content">
+            <div class="form" id="user-settings" style="display: none">
+                <div class="form-element">
+                    <p style="font-weight:bold">Provide your nokia details below</p>
+                </div>
+                <div class="form-element">
+                    <label for="username">User Name</label><br/>
+                    <input type="text" name="userName" placeholder="Ex: belvenka">
+                </div>
+                <div class="form-element">
+                    <label for="">Competence Area </label><br/>
+                    <input type="text" name="competenceArea" placeholder="Ex: RAN_L2_SW_BLR_2">
+                </div>
+            </div>
+        </div>
+        <div class="row-section action-buttons">
+            <button type="button" id="user-settings-save-btn" disabled><i class="fa fa-floppy-o" aria-hidden="true"></i></button>
+            <button type="button">-</button>
+            <button type="button" id="user-settings-btn" title="Settings"><i class="fa fa-cog" aria-hidden="true"></i></button>
+        </div>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>

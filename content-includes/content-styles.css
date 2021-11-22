@@ -1,0 +1,134 @@
+/*----Common Styles-----*/
+.ext-action-btn{
+    font-family: "Nokia Pure Text Light",Arial,sans-serif, 'Baloo 2', cursive, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    display: inline-block;
+    padding: 5px 8px;
+    width: fit-content;
+    margin-left: 15px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    color: #000;
+    border-radius: 3px;
+    cursor: pointer;
+    line-height: 0.8em;
+    user-select: none;
+    font-weight: 500;
+
+/* 
+color: #fcfcfc;
+background: #1488CC;
+background: -webkit-linear-gradient(to right, #2B32B2, #1488CC); 
+background: linear-gradient(to right, #2B32B2, #1488CC); 
+
+background: #0F2027;
+background: -webkit-linear-gradient(to right, #2C5364, #203A43, #0F2027); 
+background: linear-gradient(to right, #2C5364, #203A43, #0F2027);  */
+
+
+
+}
+.ext-action-btn>i{
+    opacity: 0.9;
+}
+/*----Common Styles End-----*/
+
+
+/*-----UTE CLOUD-----*/
+.time-left, .build-detail, .tl-name{ 
+    color: #fcfcfc;
+    border-radius: 10px;
+    padding: 2px 8px;
+    margin-left: 10px;
+    font-size: 0.9em
+}
+.time-left{
+    background-color: green;
+}
+.build-detail, .tl-name{
+    background-color: #004c9a;
+}
+
+
+/*--Reporting portal - report stats feature ---*/
+.ext-wrapper{
+    /*font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;*/
+    display: inline-block;
+    z-index: 999;
+    margin-left: 20px; 
+    width: fit-content;
+    font-size: 15px;
+    position: relative;
+}
+.ext-wrapper .report-stats .stats-view-btn{
+    height: 30px;
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+    font-size: 0.9em;
+    margin-left: 10px;
+}
+.ext-wrapper .stats-viewer{
+    z-index: 999;
+    margin-top: 5px;
+    background-color: #fcfcfc;
+    /*position: absolute;*/
+    border: 5px solid rgb(58, 58, 58);
+}
+.ext-wrapper .stats-viewer .cases-type{
+    text-align: center;
+    text-transform: capitalize;
+    position: sticky;
+    line-height: 30px;
+    background-color: #fcfcfc;
+    color: black;
+    /*border-bottom: 1px solid #fcfcfc;*/
+}
+.ext-wrapper .cases-type.no-run{
+    background-color: #ccc;
+}
+.ext-wrapper .cases-type.passed{
+    color: #fcfcfc;
+    background-color: rgb(107, 194, 20);
+}
+.ext-wrapper .cases-type.failed{
+    color: #fcfcfc;
+    background-color: red;
+}
+.ext-wrapper .stats-wrapper{
+    overflow: auto;
+    height: fit-content;
+    max-height: 70vh;
+}
+.ext-wrapper .stats-viewer .stats-wrapper::-webkit-scrollbar {
+    width: 5px;
+}
+.ext-wrapper .stats-viewer .stats-wrapper::-webkit-scrollbar-thumb {
+    background: rgb(155, 155, 155); 
+    border-radius: 3px;
+}
+.ext-wrapper table.stats-table{
+    border-collapse: collapse;
+    border: 1px solid rgb(58, 58, 58);
+    margin: 0px 2px;
+}
+
+.ext-wrapper table.stats-table th, .ext-wrapper table.stats-table td{
+    border: 1px solid #ccc;
+    padding: 3px 5px;
+    line-height: 20px;
+}
+.ext-wrapper table.stats-table thead tr>th{
+    text-align: left;
+}
+.ext-wrapper table.stats-table tbody tr>td:last-child{
+    text-align: center;
+}
+
+
+
+
+/*-----FEATURE: Tests to Analyse----*/
+.ext-testcase-analyser{
+    margin-bottom: 10px;
+    font-size: 13.5px;
+}
