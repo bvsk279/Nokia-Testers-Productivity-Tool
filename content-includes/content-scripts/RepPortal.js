@@ -30,7 +30,6 @@ if(window.location.hostname == repPortalHostName){
         async function setTeamProgress(searchParams, userSettings){
             const insertionElm = '.navbar-container .rep-title'
             var params = new URLSearchParams(searchParams)
-            console.log("Params: "+params)
 
             var report_id = params.get('id') || params.get('cit_id')
             if($(insertionElm).has(".ext-wrapper").length == 0 && report_id != null){
@@ -75,13 +74,13 @@ if(window.location.hostname == repPortalHostName){
                     if(userSettings.userName != undefined && userSettings.userName != null && userSettings.userName != '' && sortedNames[i].includes(userSettings.userName)){
                         statsHTML += `<tr style='border: 3px solid #0fc10f'>
                                         <th>${count}</th>
-                                        <td>${sortedNames[i]}</td>
+                                        <td class='tester-name'>${sortedNames[i]}</td>
                                         <td>${map[sortedNames[i]]}</td>
                                     </tr>`;
                     }else{
                         statsHTML += `<tr>
                                         <th>${count}</th>
-                                        <td>${sortedNames[i]}</td>
+                                        <td class='tester-name'>${sortedNames[i]}</td>
                                         <td>${map[sortedNames[i]]}</td>
                                     </tr>`;
                     }
@@ -128,6 +127,15 @@ if(window.location.hostname == repPortalHostName){
                         $(insertionElm+" .ext-wrapper .report-stats .stats-viewer").hide();
                     }
                 });
+
+                //Click res tester to filter his/her cases
+                $(insertionElm+' .ext-wrapper .report-stats .stats-viewer table tbody tr td.tester-name').on("click", function(e){
+                    var respTester = $(this).html();
+                    const url = new URL(window.location);
+                    url.searchParams.set('res_tester', respTester);
+                    window.history.pushState({}, '', url);
+                    location.reload()
+                })
             }
             
 
@@ -196,12 +204,12 @@ if(window.location.hostname == repPortalHostName){
                             if(elm.find(".ext-elm-col-cell").length == 0){
                                 elm.find('.ui-grid-cell:nth-child('+newColumnNumber+')').after(getColumnCell(newCellWidth, errorMessage));
                             }else{
-                                elm.find('.ui-grid-cell:nth-child('+(newColumnNumber+1)+')').html(getColumnCell(newCellWidth, errorMessage));
+                                //elm.find('.ui-grid-cell:nth-child('+(newColumnNumber+1)+')').html(getColumnCell(newCellWidth, errorMessage));
+                                elm.find('.ext-elm-col-cell .ext-cell-contents').html(errorMessage);
                             }
                         }
 
                         getLogErrorMesage($(this), logURL)
-
 
                          
                     })
@@ -213,7 +221,7 @@ if(window.location.hostname == repPortalHostName){
                 
             }
         }
-
+//TODO: ADD chrome.onInstall Action. To show buttons right after the Extention is added to chrome
 
 
 
@@ -229,9 +237,9 @@ if(window.location.hostname == repPortalHostName){
                         $(".navbar-container").ready(function() {
 
                             setTimeout(function(){
-                                console.time('Execution Time');
+                                //console.time('Execution Time');
                                 setTeamProgress(window.location.search, userSettings);
-                                console.timeEnd('Execution Time');
+                                //console.timeEnd('Execution Time');
 
                             }, 1000)
 
@@ -258,7 +266,6 @@ if(window.location.hostname == repPortalHostName){
 
                         $("[container-id=\"'body'\"] .ui-grid-canvas .ui-grid-row").ready(function() {
                             spinnerInterval = setInterval(() => {
-                                console.log("Entered into interval")
                                 if($("[container-id=\"'body'\"] .ui-grid-row .ext-cell-contents").length > 0 ){
                                     $("[container-id=\"'body'\"] .ui-grid-row").each(function(){
                                         $(this).find(".ext-cell-contents").empty()

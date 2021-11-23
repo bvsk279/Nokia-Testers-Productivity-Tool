@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
-    "name": "Nokia Testers EX",
-    "description": "EXperiance the New Normal",
+    "name": "Nokia Testers Tool",
+    "description": "Experiance the New Normal",
     "version": "1.0",
     "icons": {"128": "icons/favicon-192.png"},
     "browser_action":{

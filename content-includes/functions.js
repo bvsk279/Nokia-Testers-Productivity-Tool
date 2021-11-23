@@ -55,12 +55,12 @@ function getTimeLeft(endDate){
 // }
 
 async function getWebContent(URL) {
-    const response = await fetch(URL, {}).then(res => res).then(data => data) // type: Promise<Response>
-    if (!response.ok) {
-      //throw Error(response.statusText)
-      console.log("failed to load!");
-    }
-    return response.text()
+        const response = await fetch(URL, {}).then(res => res).then(data => data) // type: Promise<Response>
+        if (!response.ok) {
+        //throw Error(response.statusText)
+            console.log("failed to load!");
+        }
+        return response.text()
 }
 
 
@@ -116,6 +116,13 @@ const getColumnCell = (width, content) => {
 }
 
 
+
+const setUrlSearchParam = (URL, paramName, paramValue) =>{
+    var queryString =  URL ? URL.split('?')[1] : window.location.search.slice(1);
+    var params = new URLSearchParams(queryString)
+    params.set(paramName, paramValue)
+    return URL.split('?')[0]+"?"+params; 
+}
 
 
 

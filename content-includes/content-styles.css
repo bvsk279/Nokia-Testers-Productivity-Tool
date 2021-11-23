@@ -24,17 +24,25 @@ background: #0F2027;
 background: -webkit-linear-gradient(to right, #2C5364, #203A43, #0F2027); 
 background: linear-gradient(to right, #2C5364, #203A43, #0F2027);  */
 
-
-
 }
 .ext-action-btn>i{
     opacity: 0.9;
+}
+
+.show-on-hover{
+    display: none;
+}
+.build-detail .show-on-hover{
+    transition: 1s ease-in-out;
+}
+.build-detail:hover .show-on-hover{
+    display: inline;
 }
 /*----Common Styles End-----*/
 
 
 /*-----UTE CLOUD-----*/
-.time-left, .build-detail, .tl-name{ 
+.ext-elm-tag{ 
     color: #fcfcfc;
     border-radius: 10px;
     padding: 2px 8px;
@@ -46,6 +54,10 @@ background: linear-gradient(to right, #2C5364, #203A43, #0F2027);  */
 }
 .build-detail, .tl-name{
     background-color: #004c9a;
+}
+
+.green-tag{
+    background-color: green;
 }
 
 
@@ -124,6 +136,14 @@ background: linear-gradient(to right, #2C5364, #203A43, #0F2027);  */
     text-align: center;
 }
 
+.ext-wrapper .stats-viewer table tbody tr td.tester-name{
+    cursor: pointer;
+}
+.ext-wrapper .stats-viewer table tbody tr td.tester-name:hover{
+    font-weight: 500;
+    color: rgb(15, 79, 151);
+    color: #053fc3;
+}
 
 
 
