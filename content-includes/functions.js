@@ -124,6 +124,10 @@ const setUrlSearchParam = (URL, paramName, paramValue) =>{
     return URL.split('?')[0]+"?"+params; 
 }
 
+const extExecCopy = (copyText, message) => {
+    navigator.clipboard.writeText(copyText).then(() => {if(message) alert(message)})
+}
+
 
 
 // async function getLogErrorMesage(logURL) {

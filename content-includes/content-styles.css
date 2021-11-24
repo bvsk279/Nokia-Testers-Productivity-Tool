@@ -1,4 +1,7 @@
 /*----Common Styles-----*/
+.ext-elm button:active{
+    outline: none
+}
 .ext-action-btn{
     font-family: "Nokia Pure Text Light",Arial,sans-serif, 'Baloo 2', cursive, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     display: inline-block;
@@ -33,9 +36,10 @@ background: linear-gradient(to right, #2C5364, #203A43, #0F2027);  */
     display: none;
 }
 .build-detail .show-on-hover{
-    transition: 1s ease-in-out;
+    transition: all 1s ease-in-out;
 }
 .build-detail:hover .show-on-hover{
+    transition: all 1s ease-in-out;
     display: inline;
 }
 /*----Common Styles End-----*/
@@ -55,9 +59,39 @@ background: linear-gradient(to right, #2C5364, #203A43, #0F2027);  */
 .build-detail, .tl-name{
     background-color: #004c9a;
 }
+.copy-ip-address{
+    font-size: 0.8em;
+    transition: 0.1s ease-in;
+    background-color: inherit;
+    border: none;
+}
+.copy-ip-address:active{
+    font-size: 0.6em;
+}
 
 .green-tag{
     background-color: green;
+}
+.red-tag{
+    background-color: red;
+}
+.grey-tag{
+    background-color: #ccc;
+}
+.blue-tag{
+    background-color: #004c9a;
+}
+.green-indication{
+    border-left: 3px solid #10bb1a;
+}
+.orange-indication{
+    border-left: 3px solid orange;
+}
+.red-indication{
+    border-left: 3px solid red;
+}
+.grey-indication{
+    border-left: 3px solid #ccc;
 }
 
 
