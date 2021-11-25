@@ -68,6 +68,12 @@ background: linear-gradient(to right, #2C5364, #203A43, #0F2027);  */
 .copy-ip-address:active{
     font-size: 0.6em;
 }
+/*--Single Run Executions Page--*/
+.id-field-extention-toggler{
+    cursor: pointer;
+    margin-left: 5px;
+    padding: 5px 10px;
+}
 
 .green-tag{
     background-color: green;
@@ -80,6 +86,9 @@ background: linear-gradient(to right, #2C5364, #203A43, #0F2027);  */
 }
 .blue-tag{
     background-color: #004c9a;
+}
+.orange-tag{
+    background-color: orange;
 }
 .green-indication{
     border-left: 3px solid #10bb1a;

@@ -46,7 +46,7 @@ cors.onHeadersReceived = d => {
       origin = o.origin;
     }
     catch (e) {
-      console.warn('cannot extract origin for initiator', initiator);
+      //console.warn('cannot extract origin for initiator', initiator);
     }
   }
   else {

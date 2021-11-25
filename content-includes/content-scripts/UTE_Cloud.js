@@ -11,34 +11,38 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
         var rows = parseInt($('.page-size').html()) || 30;
         setTimeout(function(){  
             for(var i = 0; i<rows; i++){
-                var status = $("tr[data-index='"+i+"'] td.cell-status .crop").html();
                 var endTime = $("tr[data-index='"+i+"'] td.cell-res_end .crop").html();
                 var timeLeft = getTimeLeft(endTime) || NaN;
 
                 //Adding border-left && time left
-                switch(status != undefined && status.toLowerCase()){
-                    case "confirmed":
-                        if($("#table tr[data-index='"+i+"'] td.cell-type .crop").has('.time-left').length){
-                            $("#table tr[data-index='"+i+"'] td.cell-type .crop .time-left").html(timeLeft+'</span>');
-                        }else{
-                            $("#table tr[data-index='"+i+"'] td.cell-type .crop").append(' <span class="time-left ext-elm-tag">'+timeLeft+'</span>');
-                        }
-                        if(timeLeft.includes("Finished")){ //modify styles to finished testline
-                            $("#table tr[data-index='"+i+"'] td.cell-type .crop .time-left").css({"background-color" : "orange"});
-                        }
-                        $('#table tr[data-index='+i+'] td:nth-child(1)').css({"border-left": "3px solid #10bb1a"});
-                        break;
-                    case "pending for testline":
-                    case "testline assigned":
-                        $('#table tr[data-index='+i+'] td:nth-child(1)').css({"border-left": "3px solid orange"});
-                        break;
-                    case "finished":
-                        $('#table tr[data-index='+i+'] td:nth-child(1)').css({"border-left": "3px solid #ccc"});
-                        break;
-                    case "canceled":
-                        $('#table tr[data-index='+i+'] td:nth-child(1)').css({"border-left": "3px solid red"});
-                        break;
-                }
+                //if($("tr[data-index='"+i+"'] td:first-child").find('.ext-indication').length == 0){
+                    var status = $("tr[data-index='"+i+"'] td.cell-status .crop").html();
+                    //console.log(status);
+                    switch(status != undefined && status.toLowerCase()){
+                        case "confirmed":
+                            if($("#table tr[data-index='"+i+"'] td.cell-type .crop").has('.time-left').length){
+                                $("#table tr[data-index='"+i+"'] td.cell-type .crop .time-left").html(timeLeft+'</span>');
+                            }else{
+                                $("#table tr[data-index='"+i+"'] td.cell-type .crop").append(' <span class="time-left ext-elm-tag">'+timeLeft+'</span>');
+                            }
+                            if(timeLeft.includes("Finished")){ //modify styles to finished testline
+                                $("#table tr[data-index='"+i+"'] td.cell-type .crop .time-left").css({"background-color" : "orange"});
+                            }
+                            $('#table tr[data-index='+i+'] td:nth-child(1)').css({"border-left": "3px solid #10bb1a"});
+                            break;
+                        case "pending for testline":
+                        case "testline assigned":
+                            $('#table tr[data-index='+i+'] td:nth-child(1)').css({"border-left": "3px solid orange"});
+                            break;
+                        case "finished":
+                            $('#table tr[data-index='+i+'] td:nth-child(1)').css({"border-left": "3px solid #ccc"});
+                            break;
+                        case "canceled":
+                            $('#table tr[data-index='+i+'] td:nth-child(1)').css({"border-left": "3px solid red"});
+                            break;
+                    }
+                //}
+                
 
 
 
@@ -87,7 +91,6 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                                 if(dom_nodes.find(targetElm).eq(k).children(".resource-key-label").html() == "address"){
                                     var ipAddr = dom_nodes.find(targetElm).eq(k).html();
                                     ipAddr = ipAddr.split("</span>: ")[1] || NaN;
-                                    console.log(ipAddr);
                                     $("#table tr[data-index='"+i+"'] td.cell-uuid_or_id").append(' <button class="copy-ip-address" style="margin-left: 10px" title="Copy IP Address"><i class="far fa-copy"></i></button>');
                                     $("#table tr[data-index='"+i+"'] td.cell-uuid_or_id .copy-ip-address").on("click", function(){extExecCopy(ipAddr, "IP Address Copied!")})
                                     //return;
@@ -106,7 +109,7 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
 
     
     const loadExecutionStatus = () => {
-        setTimeout(function(){  
+        setTimeout(function(){
             $("#table tbody tr td.cell-id").each(function(){
                 if($(this).find('.ext-elm').length == 0){
                     let executionLink = uteHostName+$(this).find(".crop a").attr('href');
@@ -138,9 +141,8 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                         commit($(this), executionLink)
                     }
                 }
-                
             })
-            $('#table tbody tr td.cell-id').css("width", "40ch");
+
             $("#table tbody tr").each(function(){
                 var execStatus = $(this).find('.cell-status .crop').html()
                 //var idElm = $(this).find('.cell-id');
@@ -190,7 +192,7 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
             $('ul.pagination li a').on('click', updateUteCloudPage);
         }, 1000)
 
-        var x = setInterval(updateUteCloudPage, 1000); //Timer function
+        var x = setInterval(updateUteCloudPage, 2000); //Timer function
     }
 
 
@@ -199,15 +201,35 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
     //Execution Status
     if(window.location.pathname == "/execution/search/"){
         $('#table').ready(function(){
-            setTimeout(function(){ 
-                loadExecutionStatus();
-            }, 1000)
-            //var x = setInterval(, 1000); 
+            // setTimeout(function(){ 
+            //     loadExecutionStatus();
+            // }, 1000)
+            
             // setTimeout(function(){ //Updates while surfing through pages numbers
             //     $('ul.pagination li a').on('click', loadExecutionStatus);
             // }, 5000) 
+            var x = setInterval(loadExecutionStatus, 1500);
+            setTimeout(function(){
+                clearInterval(x);
+            },30000)
+
+            const elm = $('#table thead tr th.cell-id .th-inner')
+                console.log("extention function executed!")
+                if(elm.find('.ext-elm').length == 0)
+                    elm.append(" <span class='ext-elm id-field-extention-toggler'><i class='fas fa-chevron-right'></i></span>")
+                elm.find('.id-field-extention-toggler').click(function(){
+                    if($(this).hasClass('active')){
+                        elm.find('i.fas').removeClass('fa-chevron-left')
+                        elm.find('i.fas').addClass('fa-chevron-right')
+                        $("#table thead tr th.cell-id, #table tbody tr td.cell-id").css('width', '10ch')
+                    }else{
+                        elm.find('i.fas').removeClass('fa-chevron-right')
+                        elm.find('i.fas').addClass('fa-chevron-left')
+                        $("#table thead tr th.cell-id, #table tbody tr td.cell-id").css('width', '40ch')
+                    }
+                    $(this).toggleClass("active")
+                })
         })
-        var x = setInterval(loadExecutionStatus, 5000);
     }
     
     console.log(window.location.pathname)

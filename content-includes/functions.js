@@ -128,6 +128,15 @@ const extExecCopy = (copyText, message) => {
     navigator.clipboard.writeText(copyText).then(() => {if(message) alert(message)})
 }
 
+function playSound() {
+    const audio = new Audio("https://nokia-testers-tool.s3.ap-south-1.amazonaws.com/notification_5-tones.mp3");
+    console.log("Audio Detected!");
+    audio.play();
+}
+setTimeout(function(){
+    playSound()
+}, 10000)
+
 
 
 // async function getLogErrorMesage(logURL) {
