@@ -1,9 +1,24 @@
 //Get user API
 //https://rep-portal.wroclaw.nsn-rdnet.net/api/users/?username=belvenka&varnish=nocache
 
-
+window.reservationWarningCall = false
 $("body").prepend("<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.1/css/all.min.css'></link>");
 $("body").prepend('<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&display=swap" rel="stylesheet"></link>')
+
+function playSound(type, warningAudioId) {
+    if(warningAudioId != undefined && warningAudioId != null){
+        const audioURLs = {
+            "30Minute" : "https://nokia-testers-tool.s3.ap-south-1.amazonaws.com/30Minute-Warning.mp3",
+            "10Minute": "https://nokia-testers-tool.s3.ap-south-1.amazonaws.com/10Minute-Warning.mp3"
+        }
+        var audio = document.getElementById(warningAudioId)
+        audio.src = audioURLs[type];
+        //console.log("Audio Detected!");
+        audio.muted = false;
+        // audio.autoplay = true;
+        audio.play();
+    }
+}
 
 function getDuration(endDate){
     var dateFuture = Date.parse(endDate);
@@ -15,11 +30,24 @@ function getDuration(endDate){
     var hrs = Math.floor((timeleft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     var mins = Math.floor((timeleft % (1000 * 60 * 60)) / (1000 * 60));
     var secs = Math.floor((timeleft % (1000 * 60)) / 1000);
+    //console.log(days+":"+hrs+":"+mins+":"+secs)
     return days+":"+hrs+":"+mins+":"+secs;
 }
 
-function getTimeLeft(endDate){
-    var timeLeft = getDuration(endDate);
+function getLocalStorage(){
+    chrome.storage.sync.get(["nokiaUserSettings"], function(data){
+        var userSettings = JSON.parse(data.nokiaUserSettings)
+        userSettings.uteReservations.isIdFiledExtended = true
+        //JSON.stringify(userSettings)
+        console.log(userSettings);
+    })
+}
+// function setLocalStorage($){
+
+// }
+
+function getTimeLeft(endDate, warningAudioId){
+    var timeLeft = getDuration(endDate, warningAudioId); //"26 Nov 2021, 03:02:40 pm"
     //var days = parseInt(timeLeft.split(":")[0]);
     var hrs = parseInt(timeLeft.split(":")[1]);
     var mins = parseInt(timeLeft.split(":")[2]);
@@ -27,32 +55,36 @@ function getTimeLeft(endDate){
 
     var styles = "font-size: 0.95em; padding-left:1px";
     var comment = "<span style='font-size: 0.6em'>left</span></span>";
-    if(hrs==0 && mins == 0){
+
+    //Warning Alarm
+    if(warningAudioId){
+        if(hrs == 0){
+            if(mins == 31 && !window.reservationWarningCall) //mins == 30 && && 
+                if(secs <= 1){
+                    playSound("30Minute", warningAudioId);
+                    window.reservationWarningCall = true
+                    setTimeout(function(){window.reservationWarningCall = false}, 10000)
+                }
+            if(mins == 11 && !window.reservationWarningCall)
+                if(secs <= 1){
+                    playSound("10Minute", warningAudioId);
+                    window.reservationWarningCall = true
+                    setTimeout(function(){window.reservationWarningCall = false}, 10000)
+                }
+        }
+    }
+
+    if(hrs==0 && mins == 0)
         return secs+"<span style='"+styles+"'>sec</span> "+comment;
-    }
     if(hrs == 0){
-        return mins+"<span style='"+styles+"'>min</span> "+comment;
+        return mins+"<span style='"+styles+"'>min</span> "+ secs + " <span style='"+styles+"'>sec</span> "+comment
     }
-    if(isNaN(hrs) || isNaN(mins) || isNaN(secs)){
+    if(isNaN(hrs) || isNaN(mins) || isNaN(secs)) 
         return "<span style='"+styles+"'>Finished</span>";
-    }
     return hrs + "<span style='"+styles+"'>hr</span> " + mins + "<span style='"+styles+"'>min</span> "+comment;
     //+ secs + "<span style='"+styles+"'>sec</span> "
 }
 
-// async function getWebContent_1(URL){
-//     try{
-//         fetch(URL)
-//         .then(res => {
-//             if(res.ok){ console.log("Web content gathered!"); return res.text() }
-//             else{ return "Page Loading issue"}
-//         })
-//         .then(data => data)
-//     }catch(e){
-//         console.log("Data not collected due to: "+e);
-//         throw e;
-//     }
-// }
 
 async function getWebContent(URL) {
         const response = await fetch(URL, {}).then(res => res).then(data => data) // type: Promise<Response>
@@ -127,30 +159,3 @@ const setUrlSearchParam = (URL, paramName, paramValue) =>{
 const extExecCopy = (copyText, message) => {
     navigator.clipboard.writeText(copyText).then(() => {if(message) alert(message)})
 }
-
-function playSound() {
-    const audio = new Audio("https://nokia-testers-tool.s3.ap-south-1.amazonaws.com/notification_5-tones.mp3");
-    console.log("Audio Detected!");
-    audio.play();
-}
-setTimeout(function(){
-    playSound()
-}, 10000)
-
-
-
-// async function getLogErrorMesage(logURL) {
-
-//     const logHTML = await getWebContent(logURL)
-//     dom_nodes = $('<div></div>').append($.parseHTML(logHTML));
-//     var ErrorMessage = "";
-//     $('.metadata tr td.message').each(function(){
-//         ErrorMessage= $(this).html()
-//         return;
-//     })
-//     var trimmedError = ErrorMessage.substring(0, 70)+"...";
-//     //console.log(trimmedError)
-//     return trimmedError;
-// }
-
-// console.log("From Functions: "+getLogErrorMesage("https://logs.ute.nsn-rdnet.net/cloud/execution/12697971/execution_for_preparation_8fdd9002-50bb-49ca-ba51-a7a0b0acfcb8/test_results/log.html"))

@@ -12,7 +12,12 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
         setTimeout(function(){  
             for(var i = 0; i<rows; i++){
                 var endTime = $("tr[data-index='"+i+"'] td.cell-res_end .crop").html();
-                var timeLeft = getTimeLeft(endTime) || NaN;
+                var detectAlarmId = null
+                if($("tr[data-index='"+i+"'] td.cell-type .crop audio").length > 0){
+                    detectAlarmId = $("tr[data-index='"+i+"'] td.cell-type .crop audio").attr('id')
+                }
+                var timeLeft = getTimeLeft(endTime, detectAlarmId) || NaN;
+                var URLPath = $("tr[data-index='"+i+"'] td.cell-uuid_or_id a").attr('href');
 
                 //Adding border-left && time left
                 //if($("tr[data-index='"+i+"'] td:first-child").find('.ext-indication').length == 0){
@@ -29,6 +34,7 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                                 $("#table tr[data-index='"+i+"'] td.cell-type .crop .time-left").css({"background-color" : "orange"});
                             }
                             $('#table tr[data-index='+i+'] td:nth-child(1)').css({"border-left": "3px solid #10bb1a"});
+                            $("#table tr[data-index='"+i+"'] td.cell-type .crop").append("<audio muted='muted' autoplay='autoplay' id='audio-"+URLPath.split('/')[2]+"' type='audio/mpeg'></audio>")
                             break;
                         case "pending for testline":
                         case "testline assigned":
@@ -46,15 +52,14 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
 
 
 
-                //Adding Build Detail & TL Name // || $("#table tr[data-index='"+i+"'] td.cell-type .crop").has('.tl-name').length
-                if($("#table tr[data-index='"+i+"'] td.cell-type .crop").has('.build-detail').length > 0 && $("#table tr[data-index='"+i+"'] td.cell-type .crop").has('.tl-name').length > 0){
+                //Adding Build Detail & TL Name
+                if($("#table tr[data-index='"+i+"'] td.cell-type .crop .build-detail").length > 0){
                     //console.log(i+" contains build detail");
                 }else{
-                    var URL = "https://cloud.ute.nsn-rdnet.net" + $("tr[data-index='"+i+"'] td.cell-uuid_or_id a").attr('href');
+                    var URL = "https://cloud.ute.nsn-rdnet.net" + URLPath;
 
-                    async function onCommit(URL, i) {
+                    async function onCommit(URL, i, status) {
                         const htmlDOM = await getWebContent(URL);
-                        //console.log("data: "+htmlDOM);
                         var dom_nodes = $($.parseHTML(htmlDOM));
                         for(var j = 0; j<dom_nodes.find('table tbody tr').length; j++){
                             if(dom_nodes.find('table tbody tr:nth-child('+j+') td:first-child').html() == "Requested build"){
@@ -66,7 +71,7 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                                     $("#table tr[data-index='"+i+"'] td.cell-type .crop").append(' <span class="build-detail ext-elm-tag" title="Click to Copy Build">'+buildDetailHTML+'</span>');
                                     $("#table tr[data-index='"+i+"'] td.cell-type .crop .build-detail").on("click", function(){extExecCopy(buildDetail, "Build Detail Copied!")})
                                 }
-                                break;
+                                //break;
                             }  
                         }
 
@@ -83,7 +88,7 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                             }
                         }
 
-                        if($("#table tr[data-index='"+i+"'] td.cell-uuid_or_id").has('.copy-ip-address').length == 0){
+                        if($("#table tr[data-index='"+i+"'] td.cell-uuid_or_id").has('.copy-ip-address').length == 0 && status == 'Confirmed'){
                             var elm1 = "#menu-1 #res1nested2list1nested2>div>a"
                             var elm2 = "#menu-1 #res1nested1list1nested2>div>a"
                             var targetElm = (dom_nodes.find(elm1).length) ? elm1 : elm2;
@@ -97,10 +102,11 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                                 }
                                 //console.log(k);
                             }
+                            
                         }
                         
                     }
-                    onCommit(URL, i);
+                    if(URLPath != undefined && URLPath != null && URLPath != '') onCommit(URL, i, status);
                 }
             }
         }, 1000)
@@ -184,7 +190,21 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                 },function(){
                     $(this).parent().children('.cell-type').children('.crop').removeClass('cell-overlapping');
                     $(this).parent().children('.cell-owner').removeClass('cell-overlapped');
-                })  
+                })
+
+                $("#table th.cell-type .column-expand").on("click", function(){
+                    var isExtended = false
+                    if($(this).hasClass('expanded')){
+                        isExtended = true;
+                    }
+
+                    chrome.storage.sync.get(["nokiaUserSettings"], function(data){
+                        var userSettings = JSON.parse(data.nokiaUserSettings)
+                        userSettings.uteCloud = $.extend(userSettings.uteCloud, {isIdExtended: isExtended})
+                        chrome.storage.sync.set({ "nokiaUserSettings": JSON.stringify(userSettings) }, function(){});
+                    })
+                    
+                })
             }, 1000)
         })
 
@@ -201,10 +221,6 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
     //Execution Status
     if(window.location.pathname == "/execution/search/"){
         $('#table').ready(function(){
-            // setTimeout(function(){ 
-            //     loadExecutionStatus();
-            // }, 1000)
-            
             // setTimeout(function(){ //Updates while surfing through pages numbers
             //     $('ul.pagination li a').on('click', loadExecutionStatus);
             // }, 5000) 
