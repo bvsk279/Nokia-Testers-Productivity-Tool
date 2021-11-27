@@ -1,50 +1,266 @@
 *{
-    padding: 0px;
     margin: 0px;
+    padding: 0px;
     box-sizing: border-box;
 }
-input:focus, button:focus{
-    border: 1px solid #000;
+body{
+    --main-color: #3C83C5;
+    --main-color-active: #1F6EB7;
+    --menu-color: #BBBFCA;
+    --menu-color-active: #8A95B5;
+
+    --toggle-color-active: #3C83C5;
+}
+button:active, input, input:active, textarea{
     outline: none;
 }
 .popup-body{
-    width: 200px;
-    padding: 10px;
+    width: 400px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-size: 1.2em;
+    font-size: 16px;
 }
-#user-settings{
+.nav-bar{
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    /* height: 50px; */
+    background-color: var(--main-color);
+    height: fit-content;
+    width: 100%;
+}
+.nav-bar>div{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    color: #fcfcfc;
+    user-select: none;
+}
+.nav-bar .nav-elm{
+    cursor: pointer;
+    padding: 5px 15px;
+}
+.nav-bar .nav-elm>i {
+    font-size: 1.2em;
+}
+.nav-bar .nokia-logo>span{
+    font-family: 'Rajdhani', sans-serif; 
+    font-weight: 700;
+    font-size: 1em;
+    transform: scale(1.5);
+    margin-bottom: -5px;
+}
+.nav-bar .nav-elm.nokia-logo>p{
+    font-weight: 400;
+}
+.nav-bar .nav-elm.active{
+    background-color: var(--main-color-active);
+}
+.nav-bar>div p{ 
+    font-size: 0.8em;
+}
+.navbar-content{
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 60px;
+    height: 200px;
+}
+
+.menu-content{
+    /* width: 100%; */
+    /* height: 160px; */
+}
+.menu-list-container{
+    height: 100%;
+    background-color: var(--menu-color);
+    display: flex;
+    flex-direction: column;
+}
+.menu-list-container.dev-info-menu{
+    justify-content: flex-start;
+}
+.menu-item{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding: 10px 5px;
+    color: #fcfcfc;
+    cursor: context-menu;
+}
+.menu-item>p{
+    font-size: 0.7em;
+}
+.sub-menu-items{
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+.sub-menu-items::-webkit-scrollbar{
+    width: 5px;
+}
+.actual-content::-webkit-scrollbar{
+    width: 8px;
+}
+.sub-menu-items::-webkit-scrollbar-track, .actual-content::-webkit-scrollbar-track{
+    background: #e9e9e9; 
+}
+.sub-menu-items::-webkit-scrollbar-thumb, .actual-content::-webkit-scrollbar-thumb{
+    background: rgb(172, 172, 172);
+}
+.menu-item.active{
+    background-color: var(--menu-color-active);
+}
+.menu-item img{
+   margin: 5px;
+}
+.menu-item>i {
+    font-size: 1.3em;
+}
+.menu-content{
+    font-size: 0.9em;
+}
+.menu-content-body{
+    display: grid;
+    grid-template-rows: 30px 1fr;
+    /* height: 130px; */
+}
+.menu-content-header{
+    background-color: #1F6EB7;
+    padding: 5px;
+    color: #fcfcfc;
+    font-size: 1.1em;
+}
+.actual-content-wrapper{
+    height: 170px;
+}
+.actual-content{
+    padding: 10px;
+    overflow: auto;
+    z-index: -1;
+    height: 100%;
+}
+.actual-content .form .form-element{
     margin-bottom: 15px;
 }
-.action-buttons{    
+.actual-content .form .form-element:last-child{
+    margin-bottom: 5px;
+}
+.actual-content .form .form-element label{
+    display: block;
+    margin-bottom: 5px;
+}
+.actual-content .form input,.actual-content .form textarea{
+    width: 100%;
+    padding: 3px 8px;
+    font-size: 1em;
+    font-family: inherit;
+    background-color: #EDEDED;
+    border: 1px solid #ccc;
+}
+.actual-content .form textarea{
+    height: 60px;
+    resize: vertical;
+}
+.action-btn{
+    padding: 3px 20px;
+    font-family: inherit;
+    background-color: #1F6EB7;
+    border: 1px solid #ccc;
+    color: #fcfcfc;
+    cursor: pointer
+}
+
+
+.tgl{
+    cursor:pointer;
+    text-indent:-9999px;
+    width:44px;
+    height:18px;
+    background:#d3d3d3;
+    float:right;
+    border-radius:100px;
+    position:relative;
+    margin-top:-3px
+}
+.tgl:after{
+    content:'';
+    position:absolute;
+    top:2px;
+    left:2px;
+    width:14px;
+    height:14px;
+    background:#fff;
+    border-radius:90px;
+    transition:.3s
+}
+input:checked+.tgl{
+    background:var(--toggle-color-active)
+}
+input:checked+.tgl:after{
+    left:calc(100% - 3px);
+    transform:translateX(-100%)
+}
+.tgl:active:after{width:22px}
+
+
+#cloud-manager .form .form-element{
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    margin: 0px 40px 10px 20px;
+}
+#cloud-manager .form .form-element:last-child{
+    margin-bottom: 5px;
+}
+#cloud-manager .form .form-element .toggle{
+    margin-top: 5px;
 }
 
-.action-buttons button{
-    width: 100%;
-    border: none;
-    background-color: #eee;
-    padding: 5px 10px;
-    border-right: 1px solid #bbb;
-    cursor: pointer;
+
+/* ---Profile Styles---- */
+#contact-dev .actual-content{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
-.action-buttons button:hover{
-    background-color: #ddd;
+.profile{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 }
-.action-buttons button:last-child{
-    border-right: 0px;
+.profile-pic img{
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
 }
-.btn-active{
-    background-color: #222;
+ul.profile-info{
+    list-style: none;
+    margin-left: 15px;
+    font-size: 0.8em;
 }
-.form .form-element{
-    margin-top: 10px;
+.profile-info .name{
+    font-weight: bold;
+    font-size: 1.15em
 }
-.form .form-element:first-child{
-    margin-top: 0px;
+.profile-info .location{
+    font-size: 1.1em;
 }
-.form input{
-    padding: 2px;
-    width: 100%;
-    border: 1px solid #ccc;
+.contact-detail{
+    margin-top: 15px;
+    background-color: #f0f0f0;
+    padding: 5px 5px;
+    padding-left: 0px;
+    border-radius: 5px;
+}
+.contact-detail>span:first-child{
+    background-color: #CACACA;
+    padding: 5px 12px;
+    border-radius: 3px;
+}
+.contact-detail>span:last-child{
+    padding-left: 5px;
+    font-size: 0.9em;
 }

@@ -1,40 +1,40 @@
-$( document ).ready(function() {
-    chrome.storage.sync.get(["nokiaUserSettings"], function(data){
-        const nokiaUserSettings = JSON.parse(data.nokiaUserSettings);
-        const userName = nokiaUserSettings.userName;
-        const competenceArea = nokiaUserSettings.competenceArea;
-        if(typeof userName != undefined){
-            $('#user-settings input[name=userName]').val(userName);
-        }
-        if(typeof competenceArea != undefined){
-            $('#user-settings input[name=competenceArea]').val(competenceArea);
-        }
-    });
-});
-
-
-$('#user-settings-btn').click(function (){
-    if($('#user-settings').is(":visible")){
-        $('#user-settings-btn').addClass("btn-active");
-        $('#user-settings').hide()
-    }else{
-        $('#user-settings').show()
-    }
+$('.popup-body .nav-elm').on('click', function(){
+    $('.popup-body .nav-elm').removeClass('active')
+    $(this).addClass('active')
+    var triggerElm = $(this).attr('for')
+    $('.main-navbar-content .navbar-content').hide()
+    $("#"+triggerElm).show()
 })
 
+// $('#settings .menu-item').on("click", function(){
+//     $('#settings .menu-item').removeClass('active')
+//     $(this).addClass('active')
+// })
 
-$('#user-settings-save-btn').click(function(){
-    const userName = $('#user-settings input[name=userName]').val()
-    const competenceArea = $('#user-settings input[name=competenceArea]').val()
-    const userSettings = {userName: userName, competenceArea: competenceArea};
-    
-    chrome.storage.sync.set({ "nokiaUserSettings": JSON.stringify(userSettings) }, function(){
-        alert("saved successfully")
-        console.log("Saved!");
-    });
+// $('#dev-info .menu-item').on("click", function(){
+//     $('#dev-info .menu-item').removeClass('active')
+//     $(this).addClass('active')
+// })
+
+// $('#settings .menu-list-container .menu-item').on("click", function(){
+//     var targetId = $(this).attr('for');
+//     $('#settings .menu-content .menu-content-body').hide();
+//     $('#'+targetId).show()
+// })
+// $('#dev-info .menu-list-container .menu-item').on("click", function(){
+//     var targetId = $(this).attr('for');
+//     $('#dev-info .menu-content .menu-content-body').hide();
+//     $('#'+targetId).show()
+// })
+
+
+$('.navbar-content .menu-item').on("click", function(){
+    $(this).parent().parent().find('.menu-item').removeClass('active')
+    $(this).addClass('active')
 })
 
-$('#user-settings input[name=userName], #user-settings input[name=competenceArea]').keypress(function(){
-    $('#user-settings-save-btn').removeAttr("disabled");
-    //$('#user-settings-btn').click();
+$('.navbar-content .menu-list-container .menu-item').on("click", function(){
+    var targetId = $(this).attr('for');
+    $(this).parent().parent().find('.menu-content-body').hide();
+    $('#'+targetId).show()
 })

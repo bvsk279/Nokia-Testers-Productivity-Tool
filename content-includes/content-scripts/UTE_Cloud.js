@@ -153,24 +153,27 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                 var execStatus = $(this).find('.cell-status .crop').html()
                 //var idElm = $(this).find('.cell-id');
                 //console.log(execStatus.trim());
-                switch(execStatus.trim()){
-                    case "Execution finished":
-                        $(this).addClass('green-indication');
-                        break;
-                    case "Dry run failure":
-                    case "Execution canceled":
-                        $(this).addClass('red-indication');
-                        break;
-                    case "Testline pending":
-                    case "Execution pending":
-                    case "Execution started":
-                    case "Dry run started":
-                        $(this).addClass('orange-indication');
-                        break;
-                    default:
-                        $(this).addClass('grey-indication');
-                        break;
+                if(execStatus){
+                    switch(execStatus.trim()){
+                        case "Execution finished":
+                            $(this).addClass('green-indication');
+                            break;
+                        case "Dry run failure":
+                        case "Execution canceled":
+                            $(this).addClass('red-indication');
+                            break;
+                        case "Testline pending":
+                        case "Execution pending":
+                        case "Execution started":
+                        case "Dry run started":
+                            $(this).addClass('orange-indication');
+                            break;
+                        default:
+                            $(this).addClass('grey-indication');
+                            break;
+                    }
                 }
+                
             })
         }, 1000)
     }
@@ -193,12 +196,11 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                 })
 
                 $("#table th.cell-type .column-expand").on("click", function(){
-                    var isExtended = false
-                    if($(this).hasClass('expanded')){
-                        isExtended = true;
-                    }
-
                     chrome.storage.sync.get(["nokiaUserSettings"], function(data){
+                        var isExtended = false
+                        if($(this).hasClass('expanded')){
+                            isExtended = true;
+                        }
                         var userSettings = JSON.parse(data.nokiaUserSettings)
                         userSettings.uteCloud = $.extend(userSettings.uteCloud, {isIdExtended: isExtended})
                         chrome.storage.sync.set({ "nokiaUserSettings": JSON.stringify(userSettings) }, function(){});
@@ -227,10 +229,9 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
             var x = setInterval(loadExecutionStatus, 1500);
             setTimeout(function(){
                 clearInterval(x);
-            },30000)
+            },20000)
 
             const elm = $('#table thead tr th.cell-id .th-inner')
-                console.log("extention function executed!")
                 if(elm.find('.ext-elm').length == 0)
                     elm.append(" <span class='ext-elm id-field-extention-toggler'><i class='fas fa-chevron-right'></i></span>")
                 elm.find('.id-field-extention-toggler').click(function(){
