@@ -19,21 +19,21 @@
     <div class="popup-body">
         <div class="main-navbar-content">
 
-            <div class="navbar-content" id="dev-info">
+            <div class="navbar-content" id="dev-info" style="display: none">
                 <!-- Menu-Content Starts-->
                 <div class="menu-content">
                     <div class="menu-content-body" id="contact-dev">
-                        <div class="menu-content-header">Developer Information - Get in touch</div>
+                        <div class="menu-content-header">Connect with Developer</div>
                         <div class="actual-content-wrapper">
                             <div class="actual-content">
                                 <div class="profile">
                                     <div class="profile-pic">
-                                        <img src="https://picsum.photos/id/19/120/120" alt="Profile">
+                                        <img src="icons/dev-profile.png" alt="Profile" height="150px" width="150px">
                                     </div>
                                     <ul class="profile-info">
                                         <li class="name">Venkata Siva Krishna Bellam</li>
                                         <li class="location">Nokia - IN/Bangalore</li>
-                                        <li class="job-detail">Student Intern @ RAN L2 BLR 2</li>
+                                        <!-- <li class="job-detail">Student Intern @ RAN L2 BLR 2</li> -->
                                     </ul>
                                 </div>
                                 <div class="contact-detail-container">
@@ -42,8 +42,8 @@
                                         <span>bellam.venkata_siva_krishna@nokia.com</span>
                                     </div>
                                     <div class="contact-detail">
-                                        <span><i class="fab fa-linkedin-in"></i></span>
-                                        <span><a target="_blank" href="https://www.linkedin.com/in/venkatasivakrishnabellam/">/in/venkatasivakrishnabellam</a></span>
+                                        <span><a target="_blank" href="https://www.linkedin.com/in/bvsivakrishna/"><i class="fab fa-linkedin-in"></i></a></span>
+                                        <span><a target="_blank" href="https://www.linkedin.com/in/bvsivakrishna/">/in/bvsivakrishna</a></span>
                                     </div>
                                 </div>
                             </div>
@@ -92,21 +92,21 @@
                 <!-- Menu List Ends-->
             </div>
 
-            <div class="navbar-content" id="settings" style="display: none">
+            <div class="navbar-content" id="settings">
                 <!-- Menu Content Starts-->
                 <div class="menu-content">
                     <div class="menu-content-body" id="preferences">
-                        <div class="menu-content-header">Provide your Nokia Details for a better experince</div>
+                        <div class="menu-content-header">Provide your Nokia details for better experince</div>
                         <div class="actual-content-wrapper">
                             <div class="actual-content">
                                 <div class="form">
                                     <div class="form-element">
                                         <label for="userName">User Name</label>
-                                        <input type="text" name="userName" id="userName" placeholder="Ex: belvenka" autocomplete="off">
+                                        <input type="text" name="userName" id="userName" placeholder="Ex: username" autocomplete="off" style="text-transform: lowercase;">
                                     </div>
                                     <div class="form-element">
                                         <label for="competenceArea">Competence Area </label>
-                                        <input type="text" name="competenceArea" id="competenceArea" placeholder="Ex: RAN_L2_SW_BLR_2" autocomplete="off">
+                                        <input type="text" name="competenceArea" id="competenceArea" placeholder="Ex: RAN_L2_SW_BLR_2" autocomplete="off" style="text-transform: uppercase;">
                                     </div>
                                 </div>
                             </div>
@@ -122,17 +122,18 @@
                                 <div class="form">
                                     <div class="form-element">
                                         <label>Before 1 Hour</label>
-                                        <div class="toggle"><input type="checkbox" id="one-hr-warning" name="one-hr-warning" style="display: none"/><label for="one-hr-warning" class="tgl">Toggle</label></div>
+                                        <div class="toggle"><input type="checkbox" id="oneHourWarning" name="oneHourWarning" style="display: none"/><label for="oneHourWarning" class="tgl">Toggle</label></div>
                                     </div>
                                     <div class="form-element">
                                         <label>Before 30 Minutes</label>
-                                        <div class="toggle"><input type="checkbox" id="thirty-minute-warning" name="thirty-minute-warning" style="display: none"/><label for="thirty-minute-warning" class="tgl">Toggle</label></div>
+                                        <div class="toggle"><input type="checkbox" id="thirtyMinuteWarning" name="thirtyMinuteWarning" style="display: none"/><label for="thirtyMinuteWarning" class="tgl">Toggle</label></div>
                                     </div>
                                     <div class="form-element">
                                         <label>Before 10 Minutes</label>
-                                        <div class="toggle"><input type="checkbox" id="ten-hr-warning" name="ten-hr-warning" style="display: none"/><label for="ten-hr-warning" class="tgl">Toggle</label></div>
+                                        <div class="toggle"><input type="checkbox" id="tenMinuteWarning" name="tenMinuteWarning" style="display: none"/><label for="tenMinuteWarning" class="tgl">Toggle</label></div>
                                     </div>
                                 </div>
+                                <p class='quote'>Warnings are triggered when you have the following URL already opened in your web browser <br/> <a target="_blank" href="https://cloud.ute.nsn-rdnet.net/user/reservations">cloud.ute.nsn-rdnet.net/user/reservations</a></p>
                             </div>
                             
                         </div>
@@ -175,7 +176,7 @@
             </div>
             <div class="nokia-logo">
                 <span>NOKIA</span>
-                <p>Testers Tool</p>
+                <p>Testers Automation Tool</p>
             </div>
             <div class="nav-elm active" for='settings'>
                 <i class="fas fa-cog"></i>

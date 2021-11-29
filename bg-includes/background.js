@@ -12,6 +12,28 @@ chrome.runtime.onInstalled.addListener(function() {
         });
       }
     })
+    
+    //Setting the local data
+    var newNokiaUserSettings = {
+      "userData":{
+          "userName": "",
+          "competenceArea": ""
+      },
+      "uteCloud": {
+          "userRes":{
+              "isIdExtended": false
+          },
+          "execPage":{
+              "isIdExtended": false
+          },
+          "warnings": {
+              "tenMinuteWarning" : true,
+              "thirtyMinuteWarning": true,
+              "oneHourWarning": true
+          }
+      }
+  }
+  chrome.storage.sync.set({ "nokiaUserSettings": JSON.stringify(newNokiaUserSettings)}, function(){});
 });
 
 

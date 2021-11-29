@@ -1,5 +1,6 @@
 //Get user API
 //https://rep-portal.wroclaw.nsn-rdnet.net/api/users/?username=belvenka&varnish=nocache
+const UserSettings = 
 
 window.reservationWarningCall = false
 $("body").prepend("<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.1/css/all.min.css'></link>");
@@ -8,6 +9,7 @@ $("body").prepend('<link rel="preconnect" href="https://fonts.googleapis.com"><l
 function playSound(type, warningAudioId) {
     if(warningAudioId != undefined && warningAudioId != null){
         const audioURLs = {
+            "1Hour": "https://nokia-testers-tool.s3.ap-south-1.amazonaws.com/1Hour-Warning.mp3",
             "30Minute" : "https://nokia-testers-tool.s3.ap-south-1.amazonaws.com/30Minute-Warning.mp3",
             "10Minute": "https://nokia-testers-tool.s3.ap-south-1.amazonaws.com/10Minute-Warning.mp3"
         }
@@ -42,12 +44,10 @@ function getLocalStorage(){
         console.log(userSettings);
     })
 }
-// function setLocalStorage($){
 
-// }
 
-function getTimeLeft(endDate, warningAudioId){
-    var timeLeft = getDuration(endDate, warningAudioId); //"26 Nov 2021, 03:02:40 pm"
+function getTimeLeft(endDate, warningAudioId, userSettings){
+    var timeLeft = getDuration(endDate, warningAudioId); //30 Nov 2021, 00:23:10 am
     //var days = parseInt(timeLeft.split(":")[0]);
     var hrs = parseInt(timeLeft.split(":")[1]);
     var mins = parseInt(timeLeft.split(":")[2]);
@@ -56,20 +56,29 @@ function getTimeLeft(endDate, warningAudioId){
     var styles = "font-size: 0.95em; padding-left:1px";
     var comment = "<span style='font-size: 0.6em'>left</span></span>";
 
+    function setWarningActive(){
+        window.reservationWarningCall = true
+        setTimeout(function(){window.reservationWarningCall = false}, 10000)
+    }
     //Warning Alarm
     if(warningAudioId){
+        if(hrs == 1){
+            if(mins == 1 && !window.reservationWarningCall && userSettings.uteCloud.warnings.oneHourWarning == true)
+                if(secs <= 1){
+                    playSound("1Hour", warningAudioId);
+                    setWarningActive()
+                }
+        }
         if(hrs == 0){
-            if(mins == 31 && !window.reservationWarningCall) //mins == 30 && && 
+            if(mins == 31 && !window.reservationWarningCall && userSettings.uteCloud.warnings.thirtyMinuteWarning == true) //mins == 30 && && 
                 if(secs <= 1){
                     playSound("30Minute", warningAudioId);
-                    window.reservationWarningCall = true
-                    setTimeout(function(){window.reservationWarningCall = false}, 10000)
+                    setWarningActive()
                 }
-            if(mins == 11 && !window.reservationWarningCall)
+            if(mins == 11 && !window.reservationWarningCall && userSettings.uteCloud.warnings.tenMinuteWarning == true)
                 if(secs <= 1){
                     playSound("10Minute", warningAudioId);
-                    window.reservationWarningCall = true
-                    setTimeout(function(){window.reservationWarningCall = false}, 10000)
+                    setWarningActive()
                 }
         }
     }
@@ -77,7 +86,7 @@ function getTimeLeft(endDate, warningAudioId){
     if(hrs==0 && mins == 0)
         return secs+"<span style='"+styles+"'>sec</span> "+comment;
     if(hrs == 0){
-        return mins+"<span style='"+styles+"'>min</span> "+ secs + " <span style='"+styles+"'>sec</span> "+comment
+        return mins+"<span style='"+styles+"'>min</span> "+comment
     }
     if(isNaN(hrs) || isNaN(mins) || isNaN(secs)) 
         return "<span style='"+styles+"'>Finished</span>";

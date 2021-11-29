@@ -7,7 +7,7 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
 
     //API = "https://rep-portal.wroclaw.nsn-rdnet.net/api/automatic-test/runs/report/?fields=no,id,result_color,url,qc_test_instance__m_path,qc_test_set,test_case__qc_instance_number,test_case__name,hyperlink_set__test_logs_url,rain_url,configuration,qc_test_instance__res_tester,end,result,env_issue_type,comment,test_line,test_col__testline_type,builds,qc_test_instance__organization,pronto&limit=25&user_stats=flag%253Dtests_to_analyze%2526is_99_planned%253DFalse%2526username%253Dbelvenka"
     var scriptLoaded = false;
-    const updateUteCloudPage = () => {
+    const updateUteCloudPage = (userSettings) => {
         var rows = parseInt($('.page-size').html()) || 30;
         setTimeout(function(){  
             for(var i = 0; i<rows; i++){
@@ -16,7 +16,7 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                 if($("tr[data-index='"+i+"'] td.cell-type .crop audio").length > 0){
                     detectAlarmId = $("tr[data-index='"+i+"'] td.cell-type .crop audio").attr('id')
                 }
-                var timeLeft = getTimeLeft(endTime, detectAlarmId) || NaN;
+                var timeLeft = getTimeLeft(endTime, detectAlarmId, userSettings) || NaN;
                 var URLPath = $("tr[data-index='"+i+"'] td.cell-uuid_or_id a").attr('href');
 
                 //Adding border-left && time left
@@ -34,7 +34,7 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                                 $("#table tr[data-index='"+i+"'] td.cell-type .crop .time-left").css({"background-color" : "orange"});
                             }
                             $('#table tr[data-index='+i+'] td:nth-child(1)').css({"border-left": "3px solid #10bb1a"});
-                            $("#table tr[data-index='"+i+"'] td.cell-type .crop").append("<audio muted='muted' autoplay='autoplay' id='audio-"+URLPath.split('/')[2]+"' type='audio/mpeg'></audio>")
+                            $("#table tr[data-index='"+i+"'] td.cell-type .crop").append("<audio muted='muted' autoplay='' id='audio-"+URLPath.split('/')[2]+"' type='audio/mpeg'></audio>")
                             break;
                         case "pending for testline":
                         case "testline assigned":
@@ -104,18 +104,28 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                             }
                             
                         }
+
                         
                     }
                     if(URLPath != undefined && URLPath != null && URLPath != '') onCommit(URL, i, status);
                 }
             }
+            $("#table tr th.cell-uuid_or_id .th-inner ").click() //to play warning without user haven't interacted with DOM eror
         }, 1000)
     }
 
 
     
-    const loadExecutionStatus = () => {
+    const loadExecutionStatus = (userSettings) => {
         setTimeout(function(){
+            //Setting the ID filed width
+            var elm = $('#table thead tr th.cell-id .th-inner')
+            var isWiden = userSettings.uteCloud.execPage.isIdExtended || false
+            if(isWiden == true){
+                elm.find('i.fas').removeClass('fa-chevron-right')
+                elm.find('i.fas').addClass('fa-chevron-left')
+                $("#table thead tr th.cell-id, #table tbody tr td.cell-id").css('width', '40ch')  
+            }
             $("#table tbody tr td.cell-id").each(function(){
                 if($(this).find('.ext-elm').length == 0){
                     let executionLink = uteHostName+$(this).find(".crop a").attr('href');
@@ -178,77 +188,87 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
         }, 1000)
     }
 
+    var userSettings = null
+    chrome.storage.sync.get(["nokiaUserSettings"], function(data){
+        if(data.nokiaUserSettings){
+            userSettings = JSON.parse(data.nokiaUserSettings)
+            if(window.location.pathname == "/user/reservations"){
+                $('#table').ready(function(){
+                    updateUteCloudPage(userSettings);
+                    setTimeout(function(){ 
+                        $("table thead .cell-uuid_or_id .th-inner").append(" <span class='ext-elm'>&ensp;|&ensp;IP</span>");
+                        $('ul.pagination li a').on('click', function(){updateUteCloudPage(userSettings)});
 
-    if(window.location.pathname == "/user/reservations"){
-        $('#table').ready(function(){
-            updateUteCloudPage();
-            setTimeout(function(){ 
-                $("table thead .cell-uuid_or_id .th-inner").append(" <span class='ext-elm'>&ensp;|&ensp;IP</span>");
-                $('ul.pagination li a').on('click', updateUteCloudPage);
+                        //Link hover makes type cell hover
+                        $("#table tbody tr td:first-child").hover(function(){
+                            $(this).parent().children('.cell-owner').addClass('cell-overlapped');
+                            $(this).parent().children('.cell-type').children('.crop').addClass('cell-overlapping');
+                        },function(){
+                            $(this).parent().children('.cell-type').children('.crop').removeClass('cell-overlapping');
+                            $(this).parent().children('.cell-owner').removeClass('cell-overlapped');
+                        })
 
-                //Link hover makes type cell hover
-                $("#table tbody tr td:first-child").hover(function(){
-                    $(this).parent().children('.cell-owner').addClass('cell-overlapped');
-                    $(this).parent().children('.cell-type').children('.crop').addClass('cell-overlapping');
-                },function(){
-                    $(this).parent().children('.cell-type').children('.crop').removeClass('cell-overlapping');
-                    $(this).parent().children('.cell-owner').removeClass('cell-overlapped');
+                        $("#table th.cell-type .column-expand").on("click", function(){
+                            chrome.storage.sync.get(["nokiaUserSettings"], function(data){
+                                var isExtended = false
+                                if($(this).hasClass('expanded')){
+                                    isExtended = true;
+                                }
+                                var userSettings = JSON.parse(data.nokiaUserSettings)
+                                userSettings.uteCloud = $.extend(userSettings.uteCloud, {isIdExtended: isExtended})
+                                chrome.storage.sync.set({ "nokiaUserSettings": JSON.stringify(userSettings) }, function(){});
+                            })
+                            
+                        })
+                    }, 1000)
                 })
 
-                $("#table th.cell-type .column-expand").on("click", function(){
-                    chrome.storage.sync.get(["nokiaUserSettings"], function(data){
-                        var isExtended = false
-                        if($(this).hasClass('expanded')){
-                            isExtended = true;
-                        }
-                        var userSettings = JSON.parse(data.nokiaUserSettings)
-                        userSettings.uteCloud = $.extend(userSettings.uteCloud, {isIdExtended: isExtended})
-                        chrome.storage.sync.set({ "nokiaUserSettings": JSON.stringify(userSettings) }, function(){});
-                    })
-                    
+                // setTimeout(function(){ //Updates while surfing through pages numbers
+                //     $('ul.pagination li a').on('click', updateUteCloudPage);
+                // }, 1000)
+
+                var x = setInterval(function(){updateUteCloudPage(userSettings)}, 2000); //Timer function
+            }
+
+
+
+
+            //Execution Status
+            if(window.location.pathname == "/execution/search/"){
+                $('#table').ready(function(){
+                    // setTimeout(function(){ //Updates while surfing through pages numbers
+                    //     $('ul.pagination li a').on('click', loadExecutionStatus);
+                    // }, 5000) 
+                    var x = setInterval(function(){loadExecutionStatus(userSettings)}, 1000);
+                    setTimeout(function(){
+                        clearInterval(x);
+                    },20000)
+
+                    var elm = $('#table thead tr th.cell-id .th-inner')
+                        if(elm.find('.ext-elm').length == 0)
+                            elm.append(" <span class='ext-elm id-field-extention-toggler'><i class='fas fa-chevron-right'></i></span>")
+
+                        var isWiden = userSettings.uteCloud.execPage.isIdExtended || false
+                        elm.find('.id-field-extention-toggler').click(function(){
+                            if($(this).hasClass('active')){
+                                elm.find('i.fas').removeClass('fa-chevron-left')
+                                elm.find('i.fas').addClass('fa-chevron-right')
+                                $("#table thead tr th.cell-id, #table tbody tr td.cell-id").css('width', '10ch')
+                                isWiden = false
+                            }else{
+                                elm.find('i.fas').removeClass('fa-chevron-right')
+                                elm.find('i.fas').addClass('fa-chevron-left')
+                                $("#table thead tr th.cell-id, #table tbody tr td.cell-id").css('width', '40ch')
+                                isWiden = true
+                            }
+                            $(this).toggleClass("active")
+                            userSettings.uteCloud.execPage.isIdExtended = isWiden
+                            chrome.storage.sync.set({ "nokiaUserSettings": JSON.stringify(userSettings) }, function(){})
+                        })
+
                 })
-            }, 1000)
-        })
-
-        setTimeout(function(){ //Updates while surfing through pages numbers
-            $('ul.pagination li a').on('click', updateUteCloudPage);
-        }, 1000)
-
-        var x = setInterval(updateUteCloudPage, 2000); //Timer function
-    }
-
-
-
-
-    //Execution Status
-    if(window.location.pathname == "/execution/search/"){
-        $('#table').ready(function(){
-            // setTimeout(function(){ //Updates while surfing through pages numbers
-            //     $('ul.pagination li a').on('click', loadExecutionStatus);
-            // }, 5000) 
-            var x = setInterval(loadExecutionStatus, 1500);
-            setTimeout(function(){
-                clearInterval(x);
-            },20000)
-
-            const elm = $('#table thead tr th.cell-id .th-inner')
-                if(elm.find('.ext-elm').length == 0)
-                    elm.append(" <span class='ext-elm id-field-extention-toggler'><i class='fas fa-chevron-right'></i></span>")
-                elm.find('.id-field-extention-toggler').click(function(){
-                    if($(this).hasClass('active')){
-                        elm.find('i.fas').removeClass('fa-chevron-left')
-                        elm.find('i.fas').addClass('fa-chevron-right')
-                        $("#table thead tr th.cell-id, #table tbody tr td.cell-id").css('width', '10ch')
-                    }else{
-                        elm.find('i.fas').removeClass('fa-chevron-right')
-                        elm.find('i.fas').addClass('fa-chevron-left')
-                        $("#table thead tr th.cell-id, #table tbody tr td.cell-id").css('width', '40ch')
-                    }
-                    $(this).toggleClass("active")
-                })
-        })
-    }
-    
-    console.log(window.location.pathname)
+            }
+        }
+    })
 
 }

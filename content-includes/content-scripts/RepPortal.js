@@ -32,7 +32,7 @@ if(window.location.hostname == repPortalHostName){
             var params = new URLSearchParams(searchParams)
 
             var report_id = params.get('id') || params.get('cit_id')
-            if($(insertionElm).has(".ext-wrapper").length == 0 && report_id != null){
+            if($(insertionElm).find(".ext-wrapper").length == 0 && report_id != null){
                 //team progress btn exists
             //}else{
                 //norun || passed || failed
@@ -71,7 +71,7 @@ if(window.location.hostname == repPortalHostName){
                 var statsHTML = ""
                 for(var i in sortedNames){
                     count += 1;
-                    if(userSettings.userName != undefined && userSettings.userName != null && userSettings.userName != '' && sortedNames[i].includes(userSettings.userName)){
+                    if(userSettings.userData.userName != undefined && userSettings.userData.userName != null && userSettings.userData.userName != '' && sortedNames[i].includes(userSettings.userData.userName)){
                         statsHTML += `<tr style='border: 3px solid #0fc10f'>
                                         <th>${count}</th>
                                         <td class='tester-name'>${sortedNames[i]}</td>
@@ -90,43 +90,47 @@ if(window.location.hostname == repPortalHostName){
                 }
                 statsHTML += "<tr><th></th><td><b>Grand total</b></td><td><b>"+names.length+"</b></td></tr>";
 
-           
-                $(insertionElm).append(`<div class='ext-wrapper'>
-                                                        <div class='report-stats'>
-                                                            <div class='stats-view-btn ext-action-btn'>Team&nbsp;Progress&ensp;<i class='fas fa-chart-bar'></i></div>
-                                                            <div class='stats-viewer'>
-                                                                <div class="cases-type ${casesStatusClassName}">${casesStatus} <span style="font-size: 0.8em">cases</span></div>
-                                                                <div class="stats-wrapper">
-                                                                    <table class="stats-table">
-                                                                        <thead>
-                                                                            <tr>
-                                                                                <th>&emsp;</th>
-                                                                                <th>Responsible Tester</th>
-                                                                                <th>TC Count</th>
-                                                                            </tr>
-                                                                        </thead>
-                                                                        <tbody>${statsHTML}</tbody>
-                                                                    </table>
+                if($(insertionElm).find(".ext-wrapper").length == 0){
+                    $(insertionElm).append(`<div class='ext-wrapper'>
+                                                            <div class='report-stats'>
+                                                                <div class='stats-view-btn ext-action-btn'>Team&nbsp;Progress&ensp;<i class='fas fa-chart-bar'></i></div>
+                                                                <div class='stats-viewer'>
+                                                                    <div class="cases-type ${casesStatusClassName}">${casesStatus} <span style="font-size: 0.8em">cases</span></div>
+                                                                    <div class="stats-wrapper">
+                                                                        <table class="stats-table">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th>&emsp;</th>
+                                                                                    <th>Responsible Tester</th>
+                                                                                    <th>TC Count</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>${statsHTML}</tbody>
+                                                                        </table>
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                    </div>`
-                );
-                //const header = $('.top-panel .view-title')
-                $(insertionElm+" .ext-wrapper .report-stats .stats-viewer").hide();
-                $(insertionElm+' .ext-wrapper .report-stats .stats-view-btn').click((event) => {
-                    event.stopPropagation();
-                    $(insertionElm+" .ext-wrapper .report-stats .stats-viewer").toggle();
-                })
-                $(insertionElm+" .ext-wrapper .report-stats .stats-viewer").click((event) => {
-                    event.stopPropagation();
-                })
+                                                        </div>`
+                    );
+                    //const header = $('.top-panel .view-title')
+                    $(insertionElm+" .ext-wrapper .report-stats .stats-viewer").hide();
+                    console.log("Click function is executing...")
+                    $(insertionElm+' .ext-wrapper .report-stats .stats-view-btn').on("click", (event) => {
+                        console.log("Team progress click detected")
+                        event.stopPropagation();
+                        $(insertionElm+" .ext-wrapper .report-stats .stats-viewer").toggle();
+                    })
+                    $(insertionElm+" .ext-wrapper .report-stats .stats-viewer").on("click", (event) => {
+                        event.stopPropagation();
+                    })
 
-                $(window).click(() => {
-                    if($(insertionElm+' .ext-wrapper .report-stats .stats-viewer').is(":visible") == true){
-                        $(insertionElm+" .ext-wrapper .report-stats .stats-viewer").hide();
-                    }
-                });
+                    $(window).click(() => {
+                        if($(insertionElm+' .ext-wrapper .report-stats .stats-viewer').is(":visible") == true){
+                            $(insertionElm+" .ext-wrapper .report-stats .stats-viewer").hide();
+                        }
+                    });
+                }
+                
 
                 //Click res tester to filter his/her cases
                 $(insertionElm+' .ext-wrapper .report-stats .stats-viewer table tbody tr td.tester-name').on("click", function(e){
@@ -174,7 +178,7 @@ if(window.location.hostname == repPortalHostName){
                             $(this).find('.ui-grid-cell:nth-child('+newColumnNumber+')').after(getColumnCell(newCellWidth, ""));
                         })
                     }
-                    $("[container-id=\"'body'\"] .ui-grid-row").each(function(key){
+                    $("[container-id=\"'body'\"] .ui-grid-row").each(function(){
                         var logURL = $(this).find(".ui-grid-cell:nth-child("+newColumnNumber+") .ui-grid-cell-contents>a:first-child").attr('href');
 
                         logURL = logURL.replace("log.html", "output.xml")
@@ -202,7 +206,7 @@ if(window.location.hostname == repPortalHostName){
                             errorMessage = errorMessage.replace("Suite teardown failed:", "<span style='color:red'>Suite teardown failed:</span>")
                             
                             if(elm.find(".ext-elm-col-cell").length == 0){
-                                elm.find('.ui-grid-cell:nth-child('+newColumnNumber+')').after(getColumnCell(newCellWidth, errorMessage));
+                                //elm.find('.ui-grid-cell:nth-child('+newColumnNumber+')').after(getColumnCell(newCellWidth, errorMessage));
                             }else{
                                 //elm.find('.ui-grid-cell:nth-child('+(newColumnNumber+1)+')').html(getColumnCell(newCellWidth, errorMessage));
                                 elm.find('.ext-elm-col-cell .ext-cell-contents').html(errorMessage);
@@ -211,7 +215,6 @@ if(window.location.hostname == repPortalHostName){
 
                         getLogErrorMesage($(this), logURL)
 
-                         
                     })
                     
                     return;
@@ -228,10 +231,10 @@ if(window.location.hostname == repPortalHostName){
     var spinnerInterval = null
     var userSettings = null
     chrome.storage.sync.get(["nokiaUserSettings"], function(data){
-        userSettings = JSON.parse(data.nokiaUserSettings)
-            
-        chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-            if(request.message === 'TabUpdated') {
+        // var data = {nokiaUserSettings:{}}
+        if(data.nokiaUserSettings){
+            userSettings = JSON.parse(data.nokiaUserSettings)
+            function repPortalPageInit(load){
                 if(window.location.pathname == "/reports/qc/"){
                     $(function() {
                         $(".navbar-container").ready(function() {
@@ -268,7 +271,10 @@ if(window.location.hostname == repPortalHostName){
                             spinnerInterval = setInterval(() => {
                                 if($("[container-id=\"'body'\"] .ui-grid-row .ext-cell-contents").length > 0 ){
                                     $("[container-id=\"'body'\"] .ui-grid-row").each(function(){
-                                        $(this).find(".ext-cell-contents").empty()
+                                        if(load == false){
+                                            $(this).find(".ext-cell-contents").empty()
+                                            load = true
+                                        }
                                     })
                                     //clearInterval(spinnerInterval);
                                 }
@@ -279,46 +285,23 @@ if(window.location.hostname == repPortalHostName){
                     if($(".main-container .ext-testcase-analyser").length) $(".main-container .ext-testcase-analyser").remove();
                 }
             }
-        })
 
-
-            // chrome.runtime.sendMessage(
-            //     {contentScriptQuery: 'fetchUrl',
-            //     url: 'https://logs.ute.nsn-rdnet.net/cloud/execution/12697971/execution_for_preparation_8fdd9002-50bb-49ca-ba51-a7a0b0acfcb8/test_results/log.html'},
-            //     response => console.log(response)
-            // );
+            repPortalPageInit()
+            chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+                if(request.message === 'TabUpdated') {
+                    var load = false;
+                    // console.log("Entering into the Tab Updating section")
+                    repPortalPageInit(load)
+                }
+            })
+        }
     })
 }
+// chrome.storage.sync.get(["nokiaUserSettings"], function(data){
+//     console.log("Nokia User Settings Before: "+data.nokiaUserSettings)
+// })
 
-
-
-// fetch("https://logs.ute.nsn-rdnet.net/cloud/execution/12697971/execution_for_preparation_8fdd9002-50bb-49ca-ba51-a7a0b0acfcb8/test_results/log.html", {})
-//       .then(res => res)
-//       .then(data => console.log('%cRepPortal.js line:231 data', 'color: #007acc;', data.text()))
-
-
-
-
-
-
-
-
-//API calls
-        //$(".ui-grid-header-cell-row .ui-grid-header-cell[col='col']")
-
-        //$(".ui-grid-header-cell-row .ui-grid-header-cell[col='col'] .ui-grid-cell-contents .ui-grid-header-cell-label")
-        // $('.ui-grid-contents-wrapper').ready(function() {
-        //     console.log("Body detected");
-            
-        //     console.log($(".ui-grid-header-cell-label").length);
-        // })
-//var params = window.location.search;
-// var apiURL = "https://"+repPortalHostName+"/api/automatic-test/runs/report/?fields=no,id,url,qc_test_set,hyperlink_set__test_logs_url"+params;
-// const jsonData = await getJsonData(apiURL)
-// // The following will run after the `job` is finished.
-
-// var logUrlList = []
-// for(var i in jsonDataResults){
-//     logUrlList.push(jsonDataResults[i].hyperlink_set.log_file_url)
-// }
-// console.log("log URLs"+logUrlList);
+// chrome.storage.sync.remove("nokiaUserSettings", function(Items) {
+//     console.log("Removed: "+Items);
+//     alert('removed nokia user Settings');
+// })
