@@ -110,7 +110,6 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                     if(URLPath != undefined && URLPath != null && URLPath != '') onCommit(URL, i, status);
                 }
             }
-            $("#table tr th.cell-uuid_or_id .th-inner ").click() //to play warning without user haven't interacted with DOM eror
         }, 1000)
     }
 
@@ -118,19 +117,19 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
     
     const loadExecutionStatus = (userSettings) => {
         setTimeout(function(){
-            //Setting the ID filed width
+            //Setting the ID filed width Start
             var elm = $('#table thead tr th.cell-id .th-inner')
             var isWiden = userSettings.uteCloud.execPage.isIdExtended || false
             if(isWiden == true){
                 elm.find('i.fas').removeClass('fa-chevron-right')
                 elm.find('i.fas').addClass('fa-chevron-left')
-                $("#table thead tr th.cell-id, #table tbody tr td.cell-id").css('width', '40ch')  
-            }
+                $("#table thead tr th.cell-id, #table tbody tr td.cell-id").css('width', '50ch')  
+            }//Setting the ID filed width END
             $("#table tbody tr td.cell-id").each(function(){
                 if($(this).find('.ext-elm').length == 0){
                     let executionLink = uteHostName+$(this).find(".crop a").attr('href');
                     //console.log("Link: "+$(this).find(".crop a").attr('href'));
-                    async function commit(thisElm, execURL){
+                    async function commit(thisElm, execURL, execStatus){
                         const htmlDOM = await getWebContent(execURL);
                         var dom_nodes = $($.parseHTML(htmlDOM));
                         let totalCases = 0, passedCases = 0, failedCases = 0, norun = 0, canceledCased = 0;
@@ -141,21 +140,41 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                             if($(this).hasClass("canceled")) canceledCased++;
                             if($(this).hasClass("run")) norun++;
                         })
+
+                        var owner = " <span class='blue-tag ext-elm-tag'>-</span>";
+                        dom_nodes.find('table tr').each(function(){
+                            var tdContent = $(this).find('td').eq(0).html();
+                            if(tdContent != undefined && $(this).find('td').eq(0).html().trim() == "Owner"){
+                                if($(this).find('td').eq(1).html().trim() == "Cloud Regression"){
+                                    owner = " <span class='blue-tag ext-elm-tag owner-manual' title='Cloud Regression'>CR</span>"
+                                }else owner = " <span class='blue-tag ext-elm-tag owner-cloud-reg' title='Manual Execution'>M</span>";
+                                return;
+                            } 
+                        })
+
                         var plural = (totalCases > 1) ? "s" : "";
-                        var output = " <span class='blue-tag ext-elm-tag'>"+totalCases+" Case"+plural+" in total</span>"
-                        if(passedCases > 0) output += " <span class='green-tag ext-elm-tag'>"+passedCases+" Passed</span>"
-                        if(failedCases > 0) output += " <span class='red-tag ext-elm-tag'>"+failedCases+" Failed</span>"
-                        if(canceledCased > 0) output += " <span class='red-tag ext-elm-tag'>"+canceledCased+" Canceled</span>"
-                        if(norun > 0) output += " <span class='grey-tag ext-elm-tag'>"+norun+" Run</span>"
+                        var output = ''
+                        if(execStatus == "Execution finished" || execStatus == "Execution canceled"){
+                            output += owner // Adding Exec Owner
+                            output += " <span class='blue-tag ext-elm-tag'>"+totalCases+" Case"+plural+"</span>"
+                            if(passedCases > 0) output += " <span class='green-tag ext-elm-tag'>"+passedCases+" Passed</span>"
+                            if(failedCases > 0) output += " <span class='red-tag ext-elm-tag'>"+failedCases+" Failed</span>"
+                            if(canceledCased > 0) output += " <span class='red-tag ext-elm-tag'>"+canceledCased+" Canceled</span>"
+                            if(norun > 0) output += " <span class='grey-tag ext-elm-tag'>"+norun+" Run</span>"
+                            
+                        }else{
+                            output += owner // Adding Exec Owner
+                        }
+                        
                         if(thisElm.find('.ext-elm').length == 0)
                             thisElm.find(".crop").append(" <span class='ext-elm'>"+output+"</span>")
                     }
                     var execStatus = $(this).parent().find('.cell-status .crop').html()
-                    var areTagsShowable = (execStatus == "Execution finished") ? true : (execStatus == "Execution canceled") ? true : (execStatus == "Dry run failure") ? true : false;
+                    //var areTagsShowable = (execStatus == "Execution finished") ? true : (execStatus == "Execution canceled") ? true : (execStatus == "Dry run failure") ? true : false;
 
-                    if(areTagsShowable){
-                        commit($(this), executionLink)
-                    }
+                    //if(areTagsShowable){
+                        commit($(this), executionLink, execStatus)
+                    //}
                 }
             })
 
@@ -248,23 +267,29 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                         if(elm.find('.ext-elm').length == 0)
                             elm.append(" <span class='ext-elm id-field-extention-toggler'><i class='fas fa-chevron-right'></i></span>")
 
-                        var isWiden = userSettings.uteCloud.execPage.isIdExtended || false
-                        elm.find('.id-field-extention-toggler').click(function(){
-                            if($(this).hasClass('active')){
-                                elm.find('i.fas').removeClass('fa-chevron-left')
-                                elm.find('i.fas').addClass('fa-chevron-right')
-                                $("#table thead tr th.cell-id, #table tbody tr td.cell-id").css('width', '10ch')
-                                isWiden = false
-                            }else{
-                                elm.find('i.fas').removeClass('fa-chevron-right')
-                                elm.find('i.fas').addClass('fa-chevron-left')
-                                $("#table thead tr th.cell-id, #table tbody tr td.cell-id").css('width', '40ch')
-                                isWiden = true
-                            }
-                            $(this).toggleClass("active")
-                            userSettings.uteCloud.execPage.isIdExtended = isWiden
-                            chrome.storage.sync.set({ "nokiaUserSettings": JSON.stringify(userSettings) }, function(){})
-                        })
+                    var isWiden = userSettings.uteCloud.execPage.isIdExtended || false
+                    elm.find('.id-field-extention-toggler').click(function(){
+                        if($(this).hasClass('active')){
+                            elm.find('i.fas').removeClass('fa-chevron-left')
+                            elm.find('i.fas').addClass('fa-chevron-right')
+                            $("#table thead tr th.cell-id, #table tbody tr td.cell-id").css('width', '10ch')
+                            isWiden = false
+                        }else{
+                            elm.find('i.fas').removeClass('fa-chevron-right')
+                            elm.find('i.fas').addClass('fa-chevron-left')
+                            $("#table thead tr th.cell-id, #table tbody tr td.cell-id").css('width', '50ch')
+                            isWiden = true
+                        }
+                        $(this).toggleClass("active")
+                        userSettings.uteCloud.execPage.isIdExtended = isWiden
+                        chrome.storage.sync.set({ "nokiaUserSettings": JSON.stringify(userSettings) }, function(){})
+                    })
+                    
+                    if($('#container').find('ext-elms-info').length == 0)
+                        $('#container').append(`<div class="ext-elms-info">
+                                                    <span class='blue-tag ext-elm-tag' title='Manual Execution'>M</span> - Manual Single Run
+                                                    <span class='blue-tag ext-elm-tag' title='Cloud Regression'>CR</span> - Cloud Regression
+                                                </div>`)
 
                 })
             }
