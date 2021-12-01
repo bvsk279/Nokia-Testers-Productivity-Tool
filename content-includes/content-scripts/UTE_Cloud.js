@@ -1,5 +1,4 @@
 
-$("body").prepend("<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.1/css/all.min.css'></link>");
 if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
     const uteHostName = "https://cloud.ute.nsn-rdnet.net";
 
@@ -146,8 +145,8 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                             var tdContent = $(this).find('td').eq(0).html();
                             if(tdContent != undefined && $(this).find('td').eq(0).html().trim() == "Owner"){
                                 if($(this).find('td').eq(1).html().trim() == "Cloud Regression"){
-                                    owner = " <span class='blue-tag ext-elm-tag owner-manual' title='Cloud Regression'>CR</span>"
-                                }else owner = " <span class='blue-tag ext-elm-tag owner-cloud-reg' title='Manual Execution'>M</span>";
+                                    owner = " <span class='blue-tag ext-elm-tag owner-cloud-reg' title='Cloud Regression'>CR</span>"
+                                }else owner = " <span class='blue-tag ext-elm-tag owner-manual' title='Manual Execution'>M</span>";
                                 return;
                             } 
                         })
@@ -242,10 +241,6 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                     }, 1000)
                 })
 
-                // setTimeout(function(){ //Updates while surfing through pages numbers
-                //     $('ul.pagination li a').on('click', updateUteCloudPage);
-                // }, 1000)
-
                 var x = setInterval(function(){updateUteCloudPage(userSettings)}, 2000); //Timer function
             }
 
@@ -255,9 +250,6 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
             //Execution Status
             if(window.location.pathname == "/execution/search/"){
                 $('#table').ready(function(){
-                    // setTimeout(function(){ //Updates while surfing through pages numbers
-                    //     $('ul.pagination li a').on('click', loadExecutionStatus);
-                    // }, 5000) 
                     var x = setInterval(function(){loadExecutionStatus(userSettings)}, 1000);
                     setTimeout(function(){
                         clearInterval(x);

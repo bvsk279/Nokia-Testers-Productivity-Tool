@@ -2,18 +2,6 @@ const repPortalHostName = "rep-portal.wroclaw.nsn-rdnet.net";
 
 if(window.location.hostname == repPortalHostName){
     
-    //Tests to analyse feature
-    if(window.location.pathname == "/reports/test-runs/"){
-        
-    }
-
-    //No run stats
-    // if(window.location.pathname == "/reports/qc/"){
-    //     setTimeout(function(){
-    //         commit(window.location.search);
-    //     }, 1000)
-    // }
-    
     //passed
     //https://rep-portal.wroclaw.nsn-rdnet.net/api/qc-beta/instances/report/?fields=id%2Cm_path%2Ctest_set__name%2Cname%2Curl%2Cstatus%2Cstatus_color%2Cplatform%2Ctest_subarea%2Ctest_object%2Ctest_entity%2Ctest_lvl_area%2Cca%2Corganization%2Cphase%2Cdet_auto_lvl%2Cres_tester%2Cfeature%2Cbacklog_id%2Crequirement%2Cfault_report_id_link%2Csuspended&id__in=%3Ahash%3A1faf5bc07f1b097ba868563cf3a2cf98&limit=25&tep_status__passed=%3Ahash%3A1faf5bc07f1b097ba868563cf3a2cf98
     //https://rep-portal.wroclaw.nsn-rdnet.net/reports/qc/?id=%3Ahash%3A1faf5bc07f1b097ba868563cf3a2cf98&tep_status_passed=%3Ahash%3A1faf5bc07f1b097ba868563cf3a2cf98
@@ -144,11 +132,6 @@ if(window.location.hostname == repPortalHostName){
             
 
         }
-        
-        //Access Header Cell: [container-id=\"'body'\"] .ui-grid-header-cell:nth-child(1) [role="columnheader"] span.ui-grid-header-cell-label
-
-        //Access Row Number: [container-id=\"'body'\"] .ui-grid-canvas>div:nth-child(1)
-        //Access Cell Content: [container-id=\"'body'\"] .ui-grid-canvas>div:nth-child(1) [ui-grid-cell]:nth-child($CELL_NO) .ui-grid-cell-contents 
 
 
         function parseTestsToAnalyse(searchParams, userSettings){
@@ -252,7 +235,7 @@ if(window.location.hostname == repPortalHostName){
                     if($(".navbar-container .ext-wrapper").length) $(".navbar-container .ext-wrapper").remove();
                 }
 
-
+                //Tests to analyse feature
                 if(window.location.pathname == "/reports/test-runs/"){
                     $(function(){
                         $(".main-container").ready(function() {

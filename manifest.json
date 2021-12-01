@@ -1,10 +1,15 @@
 {
-    "author": "Siva Krishna Bellam",
+    "author": "Venkata Siva Krishna Bellam",
     "manifest_version": 2,
-    "name": "Nokia Testers Tool",
-    "description": "Experiance the New Normal",
+    "name": "Nokia Testers Automation Tool",
+    "description": "Experiance the New Normal while interacting with Reporting Portal, UTE Cloud and a lot more upcomming...",
     "version": "1.0",
-    "icons": {"128": "icons/favicon-192.png"},
+    "icons": {
+        "16": "icons/favicon-16.png",
+        "32": "icons/favicon-32.png",
+        "192": "icons/favicon-192.png",
+        "512": "icons/favicon-512.png"
+    },
     "browser_action":{
         "default_icon": "icons/favicon-32.png",
         "default_popup": "popup.html"
@@ -14,15 +19,19 @@
         "webNavigation",
         "activeTab",
         "storage",
-        "\u003Call_urls>",
         "webRequest",
-        "webRequestBlocking"
+        "webRequestBlocking",
+        "*://*.wroclaw.nsn-rdnet.net/*",
+        "*://*.ute.nsn-rdnet.net/*",
+        "*://www.zopamo.com/*",
+        "https://cdnjs.cloudflare.com/*"
     ],
     "content_scripts": [
         {
-            "css": ["fontawsome.css","content-includes/content-styles.css"],
+            "css": ["fontawesome.min.css","content-includes/content-styles.css"],
             "matches": [
-                "<all_urls>"
+                "*://*.wroclaw.nsn-rdnet.net/*",
+                "*://*.ute.nsn-rdnet.net/*"
             ],
             "run_at": "document_idle",
             "js": [
@@ -41,6 +50,4 @@
             "bg-includes/background.js"
         ]
     }
-    
 }
-

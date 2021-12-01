@@ -1,6 +1,7 @@
 //Get user API
 //https://rep-portal.wroclaw.nsn-rdnet.net/api/users/?username=belvenka&varnish=nocache
-const UserSettings = 
+$("body").prepend("<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.1/css/all.min.css'></link>");
+const UserSettings = null
 
 window.reservationWarningCall = false
 $("body").prepend("<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.1/css/all.min.css'></link>");
@@ -25,7 +26,6 @@ function playSound(type, warningAudioId) {
 function getDuration(endDate){
     var dateFuture = Date.parse(endDate);
     var dateNow = new Date();
-    //change below variables sub each outer -Done
     var timeleft = dateFuture - dateNow.getTime();
     if(timeleft<=0) return "completed";
     var days = Math.floor(timeleft / (1000 * 60 * 60 * 24));
@@ -36,14 +36,13 @@ function getDuration(endDate){
     return days+":"+hrs+":"+mins+":"+secs;
 }
 
-function getLocalStorage(){
-    chrome.storage.sync.get(["nokiaUserSettings"], function(data){
-        var userSettings = JSON.parse(data.nokiaUserSettings)
-        userSettings.uteReservations.isIdFiledExtended = true
-        //JSON.stringify(userSettings)
-        console.log(userSettings);
-    })
-}
+// function getLocalStorage(){
+//     chrome.storage.sync.get(["nokiaUserSettings"], function(data){
+//         var userSettings = JSON.parse(data.nokiaUserSettings)
+//         userSettings.uteReservations.isIdFiledExtended = true
+//         console.log(userSettings);
+//     })
+// }
 
 
 function getTimeLeft(endDate, warningAudioId, userSettings){

@@ -101,10 +101,10 @@
 }
 
 .owner-manual{
-    background-color: #ccc;
+
 }
 .owner-cloud-reg{
-    background-color: rgb(45, 133, 45);
+ 
 }
 
 
@@ -190,7 +190,6 @@
 }
 .ext-wrapper .stats-viewer table tbody tr td.tester-name:hover{
     font-weight: 500;
-    color: rgb(15, 79, 151);
     color: #053fc3;
 }
 

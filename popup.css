@@ -91,9 +91,11 @@ a{
     padding: 10px 5px;
     color: #fcfcfc;
     cursor: context-menu;
+    user-select: none;
 }
 .menu-item>p{
     font-size: 0.7em;
+    text-align: center;
 }
 .sub-menu-items{
     display: flex;
@@ -165,7 +167,7 @@ a{
 .actual-content .form textarea{
     height: 60px;
     resize: vertical;
-    min-height: 60px;
+    min-height: 100px;
     max-height: 300px;
 }
 .action-btn{
@@ -254,14 +256,14 @@ ul.profile-info{
     font-size: 1.1em;
 }
 .contact-detail{
-    margin-top: 15px;
+    margin-top: 12px;
     background-color: #f0f0f0;
     padding: 5px 5px;
     padding-left: 0px;
     border-radius: 5px;
 }
 .contact-detail>span:first-child{
-    background-color: #CACACA;
+    background-color: #dbdbdb;
     padding: 5px 12px;
     border-radius: 3px;
 }

@@ -51,7 +51,7 @@
                     </div>
 
                     <div class="menu-content-body" id="report-bug" style="display: none">
-                        <div class="menu-content-header">Detected a Bug?</div>
+                        <div class="menu-content-header">Detected a Bug / Tool is Good?</div>
                         <div class="actual-content-wrapper">
                             <div class="actual-content">
                                 <div class="form">
@@ -61,14 +61,14 @@
                                     </div>
                                     <div class="form-element">
                                         <label for="email">Nokia Email <span style="font-size: 0.8em; opacity:0.9">(Helps dev to contact for more details)</span></label>
-                                        <input type="text" name="email" id="email" autocomplete="off">
+                                        <input type="text" name="email" id="email" autocomplete="off" style="text-transform: lowercase">
                                     </div>
                                     <div class="form-element">
-                                        <label for="bug-detail">Describe Bug</label>
-                                        <textarea type="text" name="bug-detail" id="bug-detail" autocomplete="off"></textarea>
+                                        <label for="bug-detail">Describe Bug / Applause Message</label>
+                                        <textarea type="text" name="bug-detail" id="bug-detail" autocomplete="off" placeholder="Mention your message as detailed as possible please"></textarea>
                                     </div>
                                     <div class="form-element">
-                                        <button class="action-btn" id="report-bug-submit-btn">Report</button>
+                                        <button class="action-btn" id="report-bug-submit-btn">Report&ensp;/&ensp;Applause</button>
                                     </div>
                                 </div>
                             </div>
@@ -86,7 +86,7 @@
                     </div>
                     <div class="menu-item" for="report-bug">
                         <i class="fas fa-bug"></i>
-                        <p>Report&nbsp;Bug</p>
+                        <p>Report&nbsp;Bug<br/>or<br/>Applause</p>
                     </div>
                 </div>
                 <!-- Menu List Ends-->
@@ -184,7 +184,6 @@
             </div>
         </div>
     </div>
-    <script src="crypto.js"></script>
     <script src="popup.js"></script>
 </body>
 </html>
