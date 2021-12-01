@@ -97,8 +97,8 @@ function getTimeLeft(endDate, warningAudioId, userSettings){
 async function getWebContent(URL) {
         const response = await fetch(URL, {}).then(res => res).then(data => data) // type: Promise<Response>
         if (!response.ok) {
-        //throw Error(response.statusText)
-            console.log("failed to load!");
+            //throw Error(response.statusText)
+            //console.log("failed to load!");
         }
         return response.text()
 }
@@ -108,7 +108,7 @@ async function getJsonData(API_URL) {
     const response = await fetch(API_URL, {}).then(res => res).then(data => data) // type: Promise<Response>
     if (!response.ok) {
       //throw Error(response.statusText)
-      console.log("failed to load!");
+      //console.log("failed to load!");
     }
     return response.json()
 }

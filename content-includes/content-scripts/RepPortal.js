@@ -102,9 +102,8 @@ if(window.location.hostname == repPortalHostName){
                     );
                     //const header = $('.top-panel .view-title')
                     $(insertionElm+" .ext-wrapper .report-stats .stats-viewer").hide();
-                    console.log("Click function is executing...")
                     $(insertionElm+' .ext-wrapper .report-stats .stats-view-btn').on("click", (event) => {
-                        console.log("Team progress click detected")
+                        // console.log("Team progress click detected")
                         event.stopPropagation();
                         $(insertionElm+" .ext-wrapper .report-stats .stats-viewer").toggle();
                     })
@@ -170,7 +169,6 @@ if(window.location.hostname == repPortalHostName){
                         async function getLogErrorMesage(elm, logURL) {
 
                             const logHTML = await getWebContent(logURL)
-                            //console.log(logHTML);
                             xml = $.parseXML(logHTML);
                             $xml_nodes = $( xml )
                             var errorMessage = $xml_nodes.find('#s1>status[status="FAIL"]').text();
