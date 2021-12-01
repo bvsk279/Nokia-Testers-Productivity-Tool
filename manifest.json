@@ -2,16 +2,15 @@
     "author": "Venkata Siva Krishna Bellam",
     "manifest_version": 2,
     "name": "Nokia Testers Automation Tool",
-    "description": "Experiance the New Normal while interacting with Reporting Portal, UTE Cloud and a lot more upcomming...",
-    "version": "1.0",
+    "description": "Experiance the New Normal while interacting with Reporting Portal, UTE Cloud and a lot more comming up...",
+    "version": "0.1.0",
     "icons": {
         "16": "icons/favicon-16.png",
-        "32": "icons/favicon-32.png",
-        "192": "icons/favicon-192.png",
-        "512": "icons/favicon-512.png"
+        "48": "icons/favicon-48.png",
+        "128": "icons/favicon-128.png"
     },
     "browser_action":{
-        "default_icon": "icons/favicon-32.png",
+        "default_icon": "icons/favicon-128.png",
         "default_popup": "popup.html"
     },
     "permissions": [

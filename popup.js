@@ -106,9 +106,9 @@ $('#report-bug-submit-btn').on('click', function(){
             window.reportSending = true;
             $.ajax({
                 type: 'POST',
-                url: "https://www.zopamo.com/nokia-testers-tool-bug-report",
+                url: "https://www.zopamo.com/nokia/nokia-testers-tool-bug-report",
                 data: {"name": name, "email": email, "message": message, "metaData": navigator.userAgent},
-                success: function(resultData) { $('#name').val(''); $('#email').val(''); $('#bug-detail').val(''); console.log(resultData); alert("You message is sent successfully, Thankyou"); }
+                success: function(resultData) { $('#name').val(''); $('#email').val(''); $('#bug-detail').val(''); console.log(resultData); alert("You message is sent successfully. Thankyou"); }
             });
             setTimeout(function(){
                 window.reportSending = false;
