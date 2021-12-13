@@ -122,7 +122,7 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
             if(isWiden == true){
                 elm.find('i.fas').removeClass('fa-chevron-right')
                 elm.find('i.fas').addClass('fa-chevron-left')
-                $("#table thead tr th.cell-id, #table tbody tr td.cell-id").css('width', '50ch')  
+                $("#table thead tr th.cell-id, #table tbody tr td.cell-id").css('width', '40ch')  
             }//Setting the ID filed width END
             $("#table tbody tr td.cell-id").each(function(){
                 if($(this).find('.ext-elm').length == 0){
@@ -269,7 +269,7 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                         }else{
                             elm.find('i.fas').removeClass('fa-chevron-right')
                             elm.find('i.fas').addClass('fa-chevron-left')
-                            $("#table thead tr th.cell-id, #table tbody tr td.cell-id").css('width', '50ch')
+                            $("#table thead tr th.cell-id, #table tbody tr td.cell-id").css('width', '40ch')
                             isWiden = true
                         }
                         $(this).toggleClass("active")

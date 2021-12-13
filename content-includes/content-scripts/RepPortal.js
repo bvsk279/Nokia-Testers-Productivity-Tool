@@ -18,8 +18,8 @@ if(window.location.hostname == repPortalHostName){
         async function setTeamProgress(searchParams, userSettings){
             const insertionElm = '.navbar-container .rep-title'
             var params = new URLSearchParams(searchParams)
-
             var report_id = params.get('id') || params.get('cit_id')
+            console.log("ID:"+report_id)
             if($(insertionElm).find(".ext-wrapper").length == 0 && report_id != null){
                 //team progress btn exists
             //}else{
@@ -35,8 +35,7 @@ if(window.location.hostname == repPortalHostName){
                 }else{ //CRT
                     apiURL = "https://"+repPortalHostName+"/api/qc-beta/instances/report/?fields=res_tester,ca&id__in="+report_id+"&tep_status__norun="+report_id+"&limit=1000";
                 }
-                
-                
+
                 var jsonData = await getJsonData(apiURL)
                 if(jsonData.results.length==1000){
                     const newapiURL = apiURL+"&offset=1000";

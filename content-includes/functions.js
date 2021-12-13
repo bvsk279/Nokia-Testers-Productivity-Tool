@@ -167,3 +167,53 @@ const setUrlSearchParam = (URL, paramName, paramValue) =>{
 const extExecCopy = (copyText, message) => {
     navigator.clipboard.writeText(copyText).then(() => {if(message) alert(message)})
 }
+const getSearchParam = (searchParams, param) =>{
+    var params = new URLSearchParams(searchParams)
+    return params.get(param)
+}
+
+
+async function get_TC_Stats(apiURL){
+    var jsonData = await getJsonData(apiURL)
+    if(jsonData){return 0}
+    if(jsonData.results.length==1000){
+        const newapiURL = apiURL+"&offset=1000";
+        const newjsonData = await getJsonData(newapiURL)
+        jsonData.results = jsonData.results.concat(newjsonData.results)
+    }
+
+    var jsonDataResults = jsonData.results;
+    // jsonDataResults = jsonData.results.filter(item => {console.log(item); console.log(competenceArea); console.log(item.ca == competenceArea); return item.ca == competenceArea})
+    
+    var names = []
+    for(var i in jsonDataResults){
+        var name = jsonDataResults[i].res_tester;
+        if(name) names.push(name)
+    }
+
+    var map = names.reduce(function(p, c) {p[c] = (p[c] || 0) + 1; return p }, {});
+    var sortedNames = Object.keys(map).sort(function(a, b) {return map[b] - map[a] });
+    var count = 0;
+    var statsHTML = ""
+    for(var i in sortedNames){
+        count += 1;
+        if(userSettings.userData.userName != undefined && userSettings.userData.userName != null && userSettings.userData.userName != '' && sortedNames[i].includes(userSettings.userData.userName)){
+            statsHTML += `<tr style='border: 3px solid #0fc10f'>
+                            <th>${count}</th>
+                            <td class='tester-name'>${sortedNames[i]}</td>
+                            <td>${map[sortedNames[i]]}</td>
+                        </tr>`;
+        }else{
+            statsHTML += `<tr>
+                            <th>${count}</th>
+                            <td class='tester-name'>${sortedNames[i]}</td>
+                            <td>${map[sortedNames[i]]}</td>
+                        </tr>`;
+        }
+        //console.log( sortedNames[i] + "-> " + map[sortedNames[i]])
+
+    //console.log(sortedNames[i] + "-> " + jsonDataResults.filter((data)=>data.res_tester == sortedNames[i]).length)
+    }
+    //statsHTML += "<tr><th></th><td><b>Grand total</b></td><td><b>"+names.length+"</b></td></tr>";
+    return statsHTML;
+}
