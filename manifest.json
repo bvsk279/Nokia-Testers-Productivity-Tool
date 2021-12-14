@@ -37,8 +37,8 @@
                 "content-includes/jquery.js",
                 "content-includes/functions.js",
                 "content-includes/content-scripts/UTE_Cloud.js",
-                "content-includes/content-scripts/RepPortal.js",
-                "content-includes/content-scripts/CIT_Progress.js"
+                "content-includes/content-scripts/CIT_Progress.js",
+                "content-includes/content-scripts/RepPortal.js"
             ]
         }
     ],
