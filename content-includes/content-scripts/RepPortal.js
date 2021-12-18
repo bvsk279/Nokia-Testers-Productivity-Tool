@@ -22,35 +22,6 @@ if(window.location.hostname == repPortalHostName){
         async function setTeamProgress(searchParams, userSettings, apiUrl){
             const insertionElm = '.navbar-container .rep-title'
             var params = new URLSearchParams(searchParams)
-            // var report_id = params.get('id') || params.get('cit_id')
-            // //Adding More Filter Params
-            // let moreParams = [
-            //     {urlParam:'path', apiParam: 'm_path__pos_neg'},
-            //     {urlParam:'st_on_build', apiParam:'wall_status'},
-            //     {urlParam:'build', apiParam:'build'},
-            //     {urlParam:'ca', apiParam:'ca__pos_neg'},
-            //     {urlParam:'test_set__name', apiParam:'test_set__name__pos_neg'},
-            //     {urlParam:'name', apiParam:'name__pos_neg'},
-            //     {urlParam:'status', apiParam:'status__pos_neg'},
-            //     {urlParam:'platform', apiParam:'platform__pos_neg'},
-            //     {urlParam:'test_entity', apiParam:'test_entity__pos_neg'},
-            //     {urlParam:'organization', apiParam:'organization__pos_neg'},
-            //     {urlParam:'suspended', apiParam:'suspended'},
-            //     {urlParam:'backlog_id', apiParam:'backlog_id__pos_neg'},
-            //     {urlParam:'requirement', apiParam:'requirement__pos_neg'},
-            //     {urlParam:'feature', apiParam:'feature__pos_neg'},
-            //     {urlParam:'release', apiParam:'release__pos_neg'},
-            //     {urlParam:'sw_build', apiParam:'sw_build__pos_neg'},
-            //     {urlParam:'product', apiParam:'product__pos_neg'},
-            //     {urlParam:'function_area', apiParam:'function_area__pos_neg'},
-            //     {urlParam:'test_object', apiParam:'test_object__pos_neg'},
-            //     {urlParam:'test_subarea', apiParam:'test_subarea__pos_neg'}
-            // ];
-            // var extraParams = ''
-            // for(var i in moreParams){
-            //     extraParams+= (params.has(moreParams[i].urlParam)) ? '&'+moreParams[i].apiParam+'='+params.get(moreParams[i].urlParam) : '';
-            // }
-            // {urlParam:'', apiParam:''}
 
             if(apiUrl){
                 //team progress btn exists
@@ -61,25 +32,27 @@ if(window.location.hostname == repPortalHostName){
 
                 $(insertionElm).css('display', 'flex')
                 var apiURL = null
-                // apiURL = (params.has('cit_id')) 
-                // /*CIT*/     ? "https://"+repPortalHostName+"/api/qc-beta/instances/report/?cit_id="+report_id+extraParams+"&fields=res_tester,ca,wall_status__status&limit=1000" 
-                // /*CRT*/     : "https://"+repPortalHostName+"/api/qc-beta/instances/report/?fields=res_tester,ca,wall_status__status&id__in="+report_id+extraParams+"&limit=1000";
                 var apiParams = new URLSearchParams(apiUrl.split('?')[1])
                 apiParams.set('limit', '1000')
                 apiParams.set('fields', 'res_tester,ca,wall_status__status')
-                apiParams.set('extension-request', 'true') // Adding this will avoid infinite loop
+                apiParams.set('extension_request', 'true') // Adding this will avoid infinite loop
                 apiURL = apiUrl.split('?')[0]+"?"+apiParams;
-                console.log("API Params: "+apiURL);
+                // console.log("API Params: "+apiURL);
 
                 var jsonData = await getJsonData(apiURL)
-                if(jsonData.results.length==1000){
-                    const newjsonData = await getJsonData(apiURL+"&offset=1000")
-                    jsonData.results = jsonData.results.concat(newjsonData.results)
+                var nextURL = jsonData.next;
+                var loopCount = 0;
+                while(nextURL != null){
+                    console.log("While Looping...");
+                    var newJsonData = await getJsonData(nextURL+"&extension_request=true")
+                    jsonData.results = jsonData.results.concat(newJsonData.results)
+                    nextURL = newJsonData.next
+                    loopCount++;
+                    if(loopCount >= 5){break} //Max Web Requests: 5
                 }
 
                 var jsonDataResults = jsonData.results;
-                // jsonDataResults = jsonData.results.filter(item => {console.log(item); console.log(competenceArea); console.log(item.ca == competenceArea); return item.ca == competenceArea})
-                
+
                 var names = []
                 for(var i in jsonDataResults){
                     var name = jsonDataResults[i].res_tester;
@@ -116,7 +89,7 @@ if(window.location.hostname == repPortalHostName){
                                                             <div class='report-stats'>
                                                                 <div class='stats-view-btn ext-action-btn'>Team&nbsp;Progress&ensp;<i class='fas fa-chart-bar'></i></div>
                                                                 <div class='stats-viewer'>
-                                                                    <div class="cases-type ${casesStatusClassName}">${casesStatus} <span style="font-size: 0.8em">cases</span></div>
+                                                                    <div class="cases-type ${casesStatusClassName}"><span>${casesStatus} <span style="font-size: 0.9em">TC's</span></span><span></span><button class='refresh-btn'><i class="fas fa-sync-alt"></i>&ensp;Refresh</button></div>
                                                                     <div class="stats-wrapper">
                                                                         <table class="stats-table">
                                                                             <thead>
@@ -149,6 +122,10 @@ if(window.location.hostname == repPortalHostName){
                             $(insertionElm+" .ext-wrapper .report-stats .stats-viewer").hide();
                         }
                     });
+                    
+                    $('.stats-viewer .refresh-btn').on('click', function(){
+                        location.reload();
+                    })
                 }else{
                     $(insertionElm).find(".ext-wrapper .stats-viewer table tbody").html(statsHTML);
                 }
@@ -163,8 +140,6 @@ if(window.location.hostname == repPortalHostName){
                     location.reload()
                 })
             }
-            
-
         }
 
 
@@ -216,7 +191,6 @@ if(window.location.hostname == repPortalHostName){
                                 })
                             }
                             
-
                             errorMessage = errorMessage.substring(0, 70)+"<span style='user-select: none'>...</span>";
                             errorMessage = errorMessage.replace("Suite setup failed:", "<span style='color:red'>Suite setup failed:</span>")
                             errorMessage = errorMessage.replace("Suite teardown failed:", "<span style='color:red'>Suite teardown failed:</span>")
@@ -251,23 +225,6 @@ if(window.location.hostname == repPortalHostName){
         if(data.nokiaUserSettings){
             userSettings = JSON.parse(data.nokiaUserSettings)
             function repPortalPageInit(load){
-                if(window.location.pathname == "/reports/qc/"){
-                    $(function() {
-                        $(".navbar-container").ready(function() {
-                            var loading = setInterval(function(){
-                                // console.time('Execution Time');
-                                // setTeamProgress(window.location.search, userSettings);
-                                // console.timeEnd('Execution Time');
-                                if($('.navbar-container .rep-title').has('.ext-wrapper')){
-                                    clearInterval(loading);
-                                }
-                            }, 500)
-                        })
-                    })
-                }else{
-                    if($(".navbar-container .ext-wrapper").length) $(".navbar-container .ext-wrapper").remove();
-                }
-
                 //Tests to analyse feature
                 if(window.location.pathname == "/reports/test-runs/"){
                     $(function(){
@@ -301,32 +258,46 @@ if(window.location.hostname == repPortalHostName){
                     if($(".main-container .ext-testcase-analyser").length) $(".main-container .ext-testcase-analyser").remove();
                 }
             }
-
-            if(window.location.pathname == "/charts/cit_build_progress/"){
-                citProgress(window.location.search)
-            }
-            
             
             repPortalPageInit()
             chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
                 if(request.message === 'TabUpdated') {
                     var load = false;
-                    // alert("Tab Updating..")
-                    if(window.isLoading == false){
-                        repPortalPageInit(load);
-                        window.isLoading = true;
-                        setTimeout(function(){window.isLoading = false},1000)
+                    repPortalPageInit(load);
+                }
+            })
+
+            //Team Progress Feature
+            if(!chrome.runtime.lastError){
+                chrome.runtime.onConnect.addListener(function(port) {
+                    if(port.name === 'apiWebRequest' && window.location.pathname == "/reports/qc/") {
+                        port.onMessage.addListener(function(msg){
+                            setTeamProgress(window.location.search, userSettings, msg.url);
+                        })
                     }
-                }
-            })
-            var count = 0;
-            chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-                if(request.message === 'apiWebRequest') {
-                    console.log("Count: "+count++);
-                    setTeamProgress(window.location.search, userSettings, request.url);
-                    sendResponse({status: "Success"});
-                }
-            })
+                })
+            }else{
+                console.log(chrome.runtime.lastError.message);
+            }
+
+            // chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+            //     if(request.message === 'TabUpdated' && window.location.pathname == "/reports/qc/") {
+            //         var port = chrome.runtime.connect({name: "apiWebRequest"});
+            //         port.postMessage({request: "Get Last API Request", tabId: sender.tab.id});
+            //         port.onMessage.addListener(function(msg) {
+            //             setTeamProgress(window.location.search, userSettings, msg.url);
+            //         });
+            //     }
+            // })
+
+            
+
+
+            //CIT Charts Page - CIT Progress Featutre
+            if(window.location.pathname == "/charts/cit_build_progress/"){
+                citProgress(window.location.search)
+            }
+
         }
     })
 

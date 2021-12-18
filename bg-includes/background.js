@@ -37,19 +37,52 @@ chrome.runtime.onInstalled.addListener(function() {
 });
 
 
-
 //Team Progress Feature
 chrome.webRequest.onBeforeRequest.addListener(function(details) { 
-    if(details.url.includes('/api/') && details.url.includes('/report') && details.url.includes('fields=') && !details.url.includes('extension-request=true')){
-      console.log(details);
-      chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
-          chrome.tabs.sendMessage(tabs[0].id, {
-                message: 'apiWebRequest',
-                url: details.url
-            }, function(response) { console.log(response.status) });  
+  if(details.url.includes('/api/') && details.url.includes('/report') && details.url.includes('fields=') && !details.url.includes('extension_request=true')){
+    console.log(details.url);
+    
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
+      // console.log(tabs)
+      
+      var port = chrome.tabs.connect(tabs[0].id, {name:"apiWebRequest"});
+      port.postMessage({
+        url: details.url
       });
-    }
-  },
-  {urls: ["*://rep-portal.wroclaw.nsn-rdnet.net/*"]},
-  ["requestBody"]
+      // console.log("Post message Success");
+    });
+  }
+},
+{urls: ["*://rep-portal.wroclaw.nsn-rdnet.net/*"]},
+["requestBody"]
 );
+
+
+// window.Tabs = []
+// chrome.webRequest.onBeforeRequest.addListener(function(details) { 
+//   if(details.url.includes('/api/') && details.url.includes('/report') && details.url.includes('fields=') && !details.url.includes('extension_request=true')){
+//     console.log(details.url);
+//     chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
+//       window.Tabs.push({id: tabs[0].id, lastRequestURL: details.url})
+//     });
+//   }
+// },
+// {urls: ["*://rep-portal.wroclaw.nsn-rdnet.net/*"]},
+// ["requestBody"]
+// );
+
+// chrome.runtime.onConnect.addListener(function(port) {
+//   console.log("Port Detected");
+//   if(port.name === 'apiWebRequest') {
+//     port.onMessage.addListener(function(msg) {
+//       if (msg.request == "Get Last API Request")
+//       console.log("Tabs: "+window.Tabs)
+//       for(var i in window.Tabs){
+//         console.log(window.Tabs[i])
+//         if(window.Tabs[i].id == msg.tabId){
+//           port.postMessage({url: window.Tabs[i].lastRequestURL});
+//         }
+//       }
+//     });
+//   }
+// })

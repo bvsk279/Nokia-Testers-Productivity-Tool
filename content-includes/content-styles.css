@@ -151,6 +151,26 @@
     color: black;
     /*border-bottom: 1px solid #fcfcfc;*/
 }
+.stats-viewer .cases-type{
+    display: flex;
+    justify-content: space-evenly;
+}
+.stats-viewer .refresh-btn{
+    float: right;
+    height: calc(100%);
+    position: absolute;
+    right: 0px;
+    padding: 5px 14px;
+    border: 0px;
+    background-color: #124191;
+    border-left: 1px solid #ccc;
+    color: #ffffff;
+    cursor: pointer;
+    justify-self: end;
+}
+.stats-viewer .refresh-btn:active{
+    outline: 0px;
+}
 .ext-wrapper .cases-type.no-run{
     background-color: #ccc;
 }
