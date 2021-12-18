@@ -1,4 +1,5 @@
 const repPortalHostName = "rep-portal.wroclaw.nsn-rdnet.net";
+window.isLoading = false;
 
 if(window.location.hostname == repPortalHostName){
     
@@ -17,32 +18,62 @@ if(window.location.hostname == repPortalHostName){
 
     //Get Robot File Path
     //https://rep-portal.wroclaw.nsn-rdnet.net/api/qc/instances/?fields=test_suite&id=9013667
-
-        async function setTeamProgress(searchParams, userSettings){
+        // Triggered on new Api Request
+        async function setTeamProgress(searchParams, userSettings, apiUrl){
             const insertionElm = '.navbar-container .rep-title'
             var params = new URLSearchParams(searchParams)
-            var report_id = params.get('id') || params.get('cit_id')
-            console.log("ID:"+report_id)
-            if($(insertionElm).find(".ext-wrapper").length == 0 && report_id != null){
+            // var report_id = params.get('id') || params.get('cit_id')
+            // //Adding More Filter Params
+            // let moreParams = [
+            //     {urlParam:'path', apiParam: 'm_path__pos_neg'},
+            //     {urlParam:'st_on_build', apiParam:'wall_status'},
+            //     {urlParam:'build', apiParam:'build'},
+            //     {urlParam:'ca', apiParam:'ca__pos_neg'},
+            //     {urlParam:'test_set__name', apiParam:'test_set__name__pos_neg'},
+            //     {urlParam:'name', apiParam:'name__pos_neg'},
+            //     {urlParam:'status', apiParam:'status__pos_neg'},
+            //     {urlParam:'platform', apiParam:'platform__pos_neg'},
+            //     {urlParam:'test_entity', apiParam:'test_entity__pos_neg'},
+            //     {urlParam:'organization', apiParam:'organization__pos_neg'},
+            //     {urlParam:'suspended', apiParam:'suspended'},
+            //     {urlParam:'backlog_id', apiParam:'backlog_id__pos_neg'},
+            //     {urlParam:'requirement', apiParam:'requirement__pos_neg'},
+            //     {urlParam:'feature', apiParam:'feature__pos_neg'},
+            //     {urlParam:'release', apiParam:'release__pos_neg'},
+            //     {urlParam:'sw_build', apiParam:'sw_build__pos_neg'},
+            //     {urlParam:'product', apiParam:'product__pos_neg'},
+            //     {urlParam:'function_area', apiParam:'function_area__pos_neg'},
+            //     {urlParam:'test_object', apiParam:'test_object__pos_neg'},
+            //     {urlParam:'test_subarea', apiParam:'test_subarea__pos_neg'}
+            // ];
+            // var extraParams = ''
+            // for(var i in moreParams){
+            //     extraParams+= (params.has(moreParams[i].urlParam)) ? '&'+moreParams[i].apiParam+'='+params.get(moreParams[i].urlParam) : '';
+            // }
+            // {urlParam:'', apiParam:''}
+
+            if(apiUrl){
                 //team progress btn exists
             //}else{
                 //norun || passed || failed
                 var casesStatus = params.has('tep_status_norun') ? "no run" : params.has("tep_status_passed") ? "passed" : params.has("tep_status_failed") ? "failed" : "";
                 var casesStatusClassName = (casesStatus == "no run") ? "no-run" : (casesStatus == "passed") ? "passed" : (casesStatus == "failed") ? "failed" : "unknownn";
-                //alert("Cases Type: "+casesStatus );
 
                 $(insertionElm).css('display', 'flex')
                 var apiURL = null
-                if(params.has('cit_id')){ //CIT
-                    apiURL = "https://"+repPortalHostName+"/api/qc-beta/instances/report/"+searchParams+"&fields=res_tester,ca&limit=1000";
-                }else{ //CRT
-                    apiURL = "https://"+repPortalHostName+"/api/qc-beta/instances/report/?fields=res_tester,ca&id__in="+report_id+"&tep_status__norun="+report_id+"&limit=1000";
-                }
+                // apiURL = (params.has('cit_id')) 
+                // /*CIT*/     ? "https://"+repPortalHostName+"/api/qc-beta/instances/report/?cit_id="+report_id+extraParams+"&fields=res_tester,ca,wall_status__status&limit=1000" 
+                // /*CRT*/     : "https://"+repPortalHostName+"/api/qc-beta/instances/report/?fields=res_tester,ca,wall_status__status&id__in="+report_id+extraParams+"&limit=1000";
+                var apiParams = new URLSearchParams(apiUrl.split('?')[1])
+                apiParams.set('limit', '1000')
+                apiParams.set('fields', 'res_tester,ca,wall_status__status')
+                apiParams.set('extension-request', 'true') // Adding this will avoid infinite loop
+                apiURL = apiUrl.split('?')[0]+"?"+apiParams;
+                console.log("API Params: "+apiURL);
 
                 var jsonData = await getJsonData(apiURL)
                 if(jsonData.results.length==1000){
-                    const newapiURL = apiURL+"&offset=1000";
-                    const newjsonData = await getJsonData(newapiURL)
+                    const newjsonData = await getJsonData(apiURL+"&offset=1000")
                     jsonData.results = jsonData.results.concat(newjsonData.results)
                 }
 
@@ -79,7 +110,7 @@ if(window.location.hostname == repPortalHostName){
                 //console.log(sortedNames[i] + "-> " + jsonDataResults.filter((data)=>data.res_tester == sortedNames[i]).length)
                 }
                 statsHTML += "<tr><th></th><td><b>Grand total</b></td><td><b>"+names.length+"</b></td></tr>";
-
+                
                 if($(insertionElm).find(".ext-wrapper").length == 0){
                     $(insertionElm).append(`<div class='ext-wrapper'>
                                                             <div class='report-stats'>
@@ -118,6 +149,8 @@ if(window.location.hostname == repPortalHostName){
                             $(insertionElm+" .ext-wrapper .report-stats .stats-viewer").hide();
                         }
                     });
+                }else{
+                    $(insertionElm).find(".ext-wrapper .stats-viewer table tbody").html(statsHTML);
                 }
                 
 
@@ -221,14 +254,14 @@ if(window.location.hostname == repPortalHostName){
                 if(window.location.pathname == "/reports/qc/"){
                     $(function() {
                         $(".navbar-container").ready(function() {
-
-                            setTimeout(function(){
-                                //console.time('Execution Time');
-                                setTeamProgress(window.location.search, userSettings);
-                                //console.timeEnd('Execution Time');
-
-                            }, 1000)
-
+                            var loading = setInterval(function(){
+                                // console.time('Execution Time');
+                                // setTeamProgress(window.location.search, userSettings);
+                                // console.timeEnd('Execution Time');
+                                if($('.navbar-container .rep-title').has('.ext-wrapper')){
+                                    clearInterval(loading);
+                                }
+                            }, 500)
                         })
                     })
                 }else{
@@ -273,22 +306,33 @@ if(window.location.hostname == repPortalHostName){
                 citProgress(window.location.search)
             }
             
+            
             repPortalPageInit()
             chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
                 if(request.message === 'TabUpdated') {
                     var load = false;
-                    // console.log("Entering into the Tab Updating section")
-                    repPortalPageInit(load)
+                    // alert("Tab Updating..")
+                    if(window.isLoading == false){
+                        repPortalPageInit(load);
+                        window.isLoading = true;
+                        setTimeout(function(){window.isLoading = false},1000)
+                    }
+                }
+            })
+            var count = 0;
+            chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+                if(request.message === 'apiWebRequest') {
+                    console.log("Count: "+count++);
+                    setTeamProgress(window.location.search, userSettings, request.url);
+                    sendResponse({status: "Success"});
                 }
             })
         }
     })
-}
-// chrome.storage.sync.get(["nokiaUserSettings"], function(data){
-//     console.log("Nokia User Settings Before: "+data.nokiaUserSettings)
-// })
 
-// chrome.storage.sync.remove("nokiaUserSettings", function(Items) {
-//     console.log("Removed: "+Items);
-//     alert('removed nokia user Settings');
-// })
+    if(window.location.pathname != "/reports/qc/"){
+        $(".navbar-container").ready(function() {
+            if($(".navbar-container .ext-wrapper").length) $(".navbar-container .ext-wrapper").remove();
+        })
+    }
+}

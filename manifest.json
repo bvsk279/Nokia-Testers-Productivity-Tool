@@ -13,6 +13,7 @@
         "default_icon": "icons/favicon-128.png",
         "default_popup": "popup.html"
     },
+    "devtools_page": "dupe.html",
     "permissions": [
         "tabs",
         "webNavigation",

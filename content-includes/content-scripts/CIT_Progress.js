@@ -3,16 +3,55 @@
 //CIT Individual report: https://rep-portal.wroclaw.nsn-rdnet.net/api/qc-beta/instances/report/?build=SBTS00_ENB_9999_211213_000005&cit_id=:hash:55d5f8933c916e93ea03f743159ea204&fields=res_tester&limit=1000
 const uteHostName = "https://rep-portal.wroclaw.nsn-rdnet.net";
 
-async function buildItemHtml(url){
-    var params = url.split('?')
+// async function buildItemHtml(url){
+//     var params = url.split('?')
+
+//     let reportApi = uteHostName+'/api/qc-beta/instances/report/?build='+getSearchParam(params, 'build')+'&cit_id='+getSearchParam(params, 'cit_id')+'&fields=res_tester&limit=1000';
+//     let data = await getJsonData(reportApi);
+//     return 
+
+// }
+
+async function getGroupHtml(url, userSettings){
+    var params = url.split('?')[1]
 
     let reportApi = uteHostName+'/api/qc-beta/instances/report/?build='+getSearchParam(params, 'build')+'&cit_id='+getSearchParam(params, 'cit_id')+'&fields=res_tester&limit=1000';
+    console.log(reportApi);
     let data = await getJsonData(reportApi);
-    return 
+    console.log(data.results);
 
+    var names = []
+    for(var i in data.results){
+        var name = data.results[i].res_tester;
+        if(name) names.push(name)
+    }
+
+    var map = names.reduce(function(p, c) {p[c] = (p[c] || 0) + 1; return p }, {});
+    var sortedNames = Object.keys(map).sort(function(a, b) {return map[b] - map[a] });
+    var count = 0;
+    var statsHTML = ""
+    for(var i in sortedNames){
+        count += 1;
+        if(userSettings.userData.userName != undefined && userSettings.userData.userName != null && userSettings.userData.userName != '' && sortedNames[i].includes(userSettings.userData.userName)){
+            statsHTML += `<tr style='border: 3px solid #0fc10f'>
+                            <th>${count}</th>
+                            <td class='tester-name'>${sortedNames[i]}</td>
+                            <td>${map[sortedNames[i]]}</td>
+                        </tr>`;
+        }else{
+            statsHTML += `<tr>
+                            <th>${count}</th>
+                            <td class='tester-name'>${sortedNames[i]}</td>
+                            <td>${map[sortedNames[i]]}</td>
+                        </tr>`;
+        }
+        //console.log( sortedNames[i] + "-> " + map[sortedNames[i]])
+
+    //console.log(sortedNames[i] + "-> " + jsonDataResults.filter((data)=>data.res_tester == sortedNames[i]).length)
+    }
 }
 
-async function citProgress(searchParams){
+async function citProgress(searchParams, userSettings){
     var competenceArea = getSearchParam(searchParams, 'ca');
     var ft = getSearchParam(searchParams, 'ft');
 
@@ -95,7 +134,7 @@ async function citProgress(searchParams){
         });
     }
 
-    $(insertionElm+" .ext-wrapper .stats-viewer .item .item-header i").on('click', function(){
+    $(insertionElm+" .ext-wrapper .stats-viewer .item .item-header i").on('click', async function(){
         function reset(){
             $(insertionElm+" .ext-wrapper .stats-viewer .item .item-header i").addClass('fa-chevron-down'); $(insertionElm+" .ext-wrapper .stats-viewer .item .item-header i").removeClass('fa-chevron-up');
             $(insertionElm+" .ext-wrapper .stats-viewer .item .item-header i").find('item-content').hide();
@@ -108,7 +147,7 @@ async function citProgress(searchParams){
             $(this).addClass('fa-chevron-down'); $(this).removeClass('fa-chevron-up');
             $(this).find('item-content').hide();
         }
-        var build = $(this).parent().attr('build')
+        var build = $(this).parent().parent().attr('build')
         var output  = '';
         for(var i in citJson.xticks){
             if(citJson.xticks[i].includes(build)){
@@ -116,7 +155,8 @@ async function citProgress(searchParams){
                     if(citJson.series[j].values[i].y > 0){
                         switch(citJson.series[j].key){
                             case 'No Run':
-                                console.log(citJson.xticks[i] +" -(norun)-> "+ citJson.series[j].values[i].y);
+                                var html = await getGroupHtml(citJson.series[j].values[i].url, userSettings)
+                                console.log("html: "+html);
                                 break;
                             case 'Environment Issue':
                                 console.log(citJson.xticks[i] +" -(Env Issue)-> "+ citJson.series[j].values[i].y);
@@ -139,6 +179,3 @@ async function citProgress(searchParams){
     })
     // console.log(get_TC_Stats(URL))
 }
-
-
-
