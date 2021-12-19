@@ -59,6 +59,8 @@ $(".form input").on("keypress change", function(){
 })
 
 
+
+
 //Loading the data to popup page
 $( document ).ready(function() {
     chrome.storage.sync.get(["nokiaUserSettings"], function(data){

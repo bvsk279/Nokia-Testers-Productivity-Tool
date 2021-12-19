@@ -19,70 +19,21 @@ if(window.location.hostname == repPortalHostName){
     //Get Robot File Path
     //https://rep-portal.wroclaw.nsn-rdnet.net/api/qc/instances/?fields=test_suite&id=9013667
         // Triggered on new Api Request
-        async function setTeamProgress(searchParams, userSettings, apiUrl){
+        async function setTeamProgress(searchParams, userSettings, reqApiUrl){
             const insertionElm = '.navbar-container .rep-title'
             var params = new URLSearchParams(searchParams)
 
-            if(apiUrl){
+            if(reqApiUrl){
                 //team progress btn exists
             //}else{
                 //norun || passed || failed
-                var casesStatus = params.has('tep_status_norun') ? "no run" : params.has("tep_status_passed") ? "passed" : params.has("tep_status_failed") ? "failed" : "";
+                var casesStatus = params.has('cit_id') ? 'CIT' : params.has('tep_status_norun') ? "no run" : params.has("tep_status_passed") ? "passed" : params.has("tep_status_failed") ? "failed" : "";
                 var casesStatusClassName = (casesStatus == "no run") ? "no-run" : (casesStatus == "passed") ? "passed" : (casesStatus == "failed") ? "failed" : "unknownn";
 
                 $(insertionElm).css('display', 'flex')
-                var apiURL = null
-                var apiParams = new URLSearchParams(apiUrl.split('?')[1])
-                apiParams.set('limit', '1000')
-                apiParams.set('fields', 'res_tester,ca,wall_status__status')
-                apiParams.set('extension_request', 'true') // Adding this will avoid infinite loop
-                apiURL = apiUrl.split('?')[0]+"?"+apiParams;
-                // console.log("API Params: "+apiURL);
-
-                var jsonData = await getJsonData(apiURL)
-                var nextURL = jsonData.next;
-                var loopCount = 0;
-                while(nextURL != null){
-                    console.log("While Looping...");
-                    var newJsonData = await getJsonData(nextURL+"&extension_request=true")
-                    jsonData.results = jsonData.results.concat(newJsonData.results)
-                    nextURL = newJsonData.next
-                    loopCount++;
-                    if(loopCount >= 5){break} //Max Web Requests: 5
-                }
-
-                var jsonDataResults = jsonData.results;
-
-                var names = []
-                for(var i in jsonDataResults){
-                    var name = jsonDataResults[i].res_tester;
-                    if(name) names.push(name)
-                }
-    
-                var map = names.reduce(function(p, c) {p[c] = (p[c] || 0) + 1; return p }, {});
-                var sortedNames = Object.keys(map).sort(function(a, b) {return map[b] - map[a] });
-                var count = 0;
-                var statsHTML = ""
-                for(var i in sortedNames){
-                    count += 1;
-                    if(userSettings.userData.userName != undefined && userSettings.userData.userName != null && userSettings.userData.userName != '' && sortedNames[i].includes(userSettings.userData.userName)){
-                        statsHTML += `<tr style='border: 3px solid #0fc10f'>
-                                        <th>${count}</th>
-                                        <td class='tester-name'>${sortedNames[i]}</td>
-                                        <td>${map[sortedNames[i]]}</td>
-                                    </tr>`;
-                    }else{
-                        statsHTML += `<tr>
-                                        <th>${count}</th>
-                                        <td class='tester-name'>${sortedNames[i]}</td>
-                                        <td>${map[sortedNames[i]]}</td>
-                                    </tr>`;
-                    }
-                    //console.log( sortedNames[i] + "-> " + map[sortedNames[i]])
-
-                //console.log(sortedNames[i] + "-> " + jsonDataResults.filter((data)=>data.res_tester == sortedNames[i]).length)
-                }
-                statsHTML += "<tr><th></th><td><b>Grand total</b></td><td><b>"+names.length+"</b></td></tr>";
+                var statsHTML = await get_TC_Stats(reqApiUrl, userSettings)
+                statsHTML = statsHTML.replace('<tbody>', '')
+                statsHTML = statsHTML.replace('</tbody>', '')
                 
                 if($(insertionElm).find(".ext-wrapper").length == 0){
                     $(insertionElm).append(`<div class='ext-wrapper'>
@@ -99,7 +50,9 @@ if(window.location.hostname == repPortalHostName){
                                                                                     <th>TC Count</th>
                                                                                 </tr>
                                                                             </thead>
-                                                                            <tbody>${statsHTML}</tbody>
+                                                                            <tbody>
+                                                                                ${statsHTML}
+                                                                            </tbody>
                                                                         </table>
                                                                     </div>
                                                                 </div>
@@ -107,11 +60,19 @@ if(window.location.hostname == repPortalHostName){
                                                         </div>`
                     );
                     //const header = $('.top-panel .view-title')
-                    $(insertionElm+" .ext-wrapper .report-stats .stats-viewer").hide();
+                    console.log(userSettings)
+                    if(userSettings.repPortal.isTeamProgressOpen != true)
+                        $(insertionElm+" .ext-wrapper .report-stats .stats-viewer").hide();
                     $(insertionElm+' .ext-wrapper .report-stats .stats-view-btn').on("click", (event) => {
                         // console.log("Team progress click detected")
                         event.stopPropagation();
                         $(insertionElm+" .ext-wrapper .report-stats .stats-viewer").toggle();
+
+                        //Setting Team Progress Visibility
+                        if($(insertionElm+' .ext-wrapper .report-stats .stats-viewer').is(":visible") == true){
+                            toogleTeamProgress(true)
+                        }else toogleTeamProgress(false)
+
                     })
                     $(insertionElm+" .ext-wrapper .report-stats .stats-viewer").on("click", (event) => {
                         event.stopPropagation();
@@ -120,6 +81,7 @@ if(window.location.hostname == repPortalHostName){
                     $(window).click(() => {
                         if($(insertionElm+' .ext-wrapper .report-stats .stats-viewer').is(":visible") == true){
                             $(insertionElm+" .ext-wrapper .report-stats .stats-viewer").hide();
+                            toogleTeamProgress(false)
                         }
                     });
                     
@@ -295,7 +257,7 @@ if(window.location.hostname == repPortalHostName){
 
             //CIT Charts Page - CIT Progress Featutre
             if(window.location.pathname == "/charts/cit_build_progress/"){
-                citProgress(window.location.search)
+                citProgress(window.location.search, userSettings)
             }
 
         }

@@ -31,6 +31,9 @@ chrome.runtime.onInstalled.addListener(function() {
               "thirtyMinuteWarning": true,
               "oneHourWarning": true
           }
+      },
+      "repPortal":{
+        "isTeamProgressOpen": false
       }
   }
   chrome.storage.sync.set({ "nokiaUserSettings": JSON.stringify(newNokiaUserSettings)}, function(){});

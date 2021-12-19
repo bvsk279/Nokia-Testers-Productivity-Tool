@@ -172,19 +172,37 @@ const getSearchParam = (searchParams, param) =>{
     return params.get(param)
 }
 
+const toogleTeamProgress = (status) => {
+    chrome.storage.sync.get(["nokiaUserSettings"], function(data){
+        const settings = JSON.parse(data.nokiaUserSettings);
+        settings.repPortal.isTeamProgressOpen = (status) ? true : false
+        chrome.storage.sync.set({ "nokiaUserSettings": JSON.stringify(settings) }, function(){});
+    });
+}
 
-async function get_TC_Stats(apiURL){
+async function get_TC_Stats(reqApiUrl, userSettings){
+    var apiURL = null
+    var apiParams = new URLSearchParams(reqApiUrl.split('?')[1])
+    apiParams.set('limit', '1000')
+    apiParams.set('fields', 'res_tester,ca,wall_status__status')
+    apiParams.set('extension_request', 'true') // Adding this will avoid infinite loop
+    apiURL = reqApiUrl.split('?')[0]+"?"+apiParams;
+    // console.log("API Params: "+apiURL);
+
     var jsonData = await getJsonData(apiURL)
-    if(jsonData){return 0}
-    if(jsonData.results.length==1000){
-        const newapiURL = apiURL+"&offset=1000";
-        const newjsonData = await getJsonData(newapiURL)
-        jsonData.results = jsonData.results.concat(newjsonData.results)
+    var nextURL = jsonData.next;
+    var loopCount = 0;
+    while(nextURL != null){
+        // console.log("While Looping...");
+        var newJsonData = await getJsonData(nextURL+"&extension_request=true")
+        jsonData.results = jsonData.results.concat(newJsonData.results)
+        nextURL = newJsonData.next
+        loopCount++;
+        if(loopCount >= 5){break} //Max Web Requests: 5
     }
 
     var jsonDataResults = jsonData.results;
-    // jsonDataResults = jsonData.results.filter(item => {console.log(item); console.log(competenceArea); console.log(item.ca == competenceArea); return item.ca == competenceArea})
-    
+
     var names = []
     for(var i in jsonDataResults){
         var name = jsonDataResults[i].res_tester;
@@ -194,10 +212,10 @@ async function get_TC_Stats(apiURL){
     var map = names.reduce(function(p, c) {p[c] = (p[c] || 0) + 1; return p }, {});
     var sortedNames = Object.keys(map).sort(function(a, b) {return map[b] - map[a] });
     var count = 0;
-    var statsHTML = ""
+    var statsHTML = "<tbody>"
     for(var i in sortedNames){
         count += 1;
-        if(userSettings.userData.userName != undefined && userSettings.userData.userName != null && userSettings.userData.userName != '' && sortedNames[i].includes(userSettings.userData.userName)){
+        if(userSettings.userData && userSettings.userData.userName != undefined && userSettings.userData.userName != null && userSettings.userData.userName != '' && sortedNames[i].includes(userSettings.userData.userName)){
             statsHTML += `<tr style='border: 3px solid #0fc10f'>
                             <th>${count}</th>
                             <td class='tester-name'>${sortedNames[i]}</td>
@@ -210,10 +228,7 @@ async function get_TC_Stats(apiURL){
                             <td>${map[sortedNames[i]]}</td>
                         </tr>`;
         }
-        //console.log( sortedNames[i] + "-> " + map[sortedNames[i]])
-
-    //console.log(sortedNames[i] + "-> " + jsonDataResults.filter((data)=>data.res_tester == sortedNames[i]).length)
     }
-    //statsHTML += "<tr><th></th><td><b>Grand total</b></td><td><b>"+names.length+"</b></td></tr>";
+    statsHTML += "<tr><th></th><td><b>Grand total</b></td><td><b>"+names.length+"</b></td></tr></tbody>";
     return statsHTML;
 }

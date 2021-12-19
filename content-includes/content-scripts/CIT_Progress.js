@@ -12,43 +12,36 @@ const uteHostName = "https://rep-portal.wroclaw.nsn-rdnet.net";
 
 // }
 
-async function getGroupHtml(url, userSettings){
+async function getGroupHtml(url, className, title, userSettings){
     var params = url.split('?')[1]
 
-    let reportApi = uteHostName+'/api/qc-beta/instances/report/?build='+getSearchParam(params, 'build')+'&cit_id='+getSearchParam(params, 'cit_id')+'&fields=res_tester&limit=1000';
-    console.log(reportApi);
-    let data = await getJsonData(reportApi);
-    console.log(data.results);
-
-    var names = []
-    for(var i in data.results){
-        var name = data.results[i].res_tester;
-        if(name) names.push(name)
+    let reportApi = uteHostName+'/api/qc-beta/instances/report/?build='+getSearchParam(params, 'build')+'&cit_id='+getSearchParam(params, 'cit_id')+'&fields=res_tester&limit=1000&extension_request=true';
+    // console.log(reportApi);
+    var statsHTML = await get_TC_Stats(reportApi, userSettings)
+    var dom_nodes = $($.parseHTML(statsHTML));
+    // console.log(dom_nodes.html());
+    var count = dom_nodes.find('tr:last-child>td:last-child>b').html();
+    dom_nodes.find('tr:last-child').remove();
+    var groupHTML = ``
+    if(statsHTML){
+        groupHTML += `<div class="group" style="font-size: 0.9em">
+                        <div class="group_title ${className}">${title}&ensp;(&nbsp;${count}&nbsp;) &ensp; <a target='_blank' href='${url}' style='color:inherit; padding: 3px 5px'><i class="fas fa-link"></i></a></div>
+                        <table class="stats-table" style="font-size: 1.1em">
+                            <thead>
+                                <tr>
+                                    <th>&emsp;</th>
+                                    <th>Responsible Tester</th>
+                                    <th>TC Count</th>
+                                </tr>
+                            </thead>
+                            <tbody url="${url}">
+                                ${dom_nodes.html()}
+                            </tbody>
+                        </table>
+                    </div>`
     }
-
-    var map = names.reduce(function(p, c) {p[c] = (p[c] || 0) + 1; return p }, {});
-    var sortedNames = Object.keys(map).sort(function(a, b) {return map[b] - map[a] });
-    var count = 0;
-    var statsHTML = ""
-    for(var i in sortedNames){
-        count += 1;
-        if(userSettings.userData.userName != undefined && userSettings.userData.userName != null && userSettings.userData.userName != '' && sortedNames[i].includes(userSettings.userData.userName)){
-            statsHTML += `<tr style='border: 3px solid #0fc10f'>
-                            <th>${count}</th>
-                            <td class='tester-name'>${sortedNames[i]}</td>
-                            <td>${map[sortedNames[i]]}</td>
-                        </tr>`;
-        }else{
-            statsHTML += `<tr>
-                            <th>${count}</th>
-                            <td class='tester-name'>${sortedNames[i]}</td>
-                            <td>${map[sortedNames[i]]}</td>
-                        </tr>`;
-        }
-        //console.log( sortedNames[i] + "-> " + map[sortedNames[i]])
-
-    //console.log(sortedNames[i] + "-> " + jsonDataResults.filter((data)=>data.res_tester == sortedNames[i]).length)
-    }
+    
+    return groupHTML;
 }
 
 async function citProgress(searchParams, userSettings){
@@ -59,17 +52,33 @@ async function citProgress(searchParams, userSettings){
 
     const citJson = await getJsonData(URL);
     var seriesData = [];
+    var series = {noRun:null, envIssue:null, notAnalysed:null, failed:null, blocked:null}
     for(var i in citJson.series){
         switch(citJson.series[i].key){
             case 'No Run':
+                series.noRun = citJson.series[i]
+                break;
             case 'Environment Issue':
+                series.envIssue = citJson.series[i]
+                break;
             case 'Not Analyzed':
+                series.notAnalysed = citJson.series[i]
+                break;
             case 'Failed':
+                series.failed = citJson.series[i]
+                break;
             case 'Blocked':
-                seriesData.push(citJson.series[i])
+                series.blocked = citJson.series[i]
                 break;
         }
     }
+    if(series.noRun) seriesData.push(series.noRun)
+    if(series.envIssue) seriesData.push(series.envIssue)
+    if(series.notAnalysed) seriesData.push(series.notAnalysed)
+    if(series.failed) seriesData.push(series.failed)
+    if(series.blocked) seriesData.push(series.blocked)
+    
+
     citJson.series = seriesData;
     console.log(citJson);
     var items_html = ``;
@@ -88,8 +97,10 @@ async function citProgress(searchParams, userSettings){
 
             if(TC_Count > 0){
                 items_html += `<div class="item" build='${build}'>
-                                    <div class="item-header"><span>${build.substr(1)}&emsp;${date}</span><i class="fas fa-chevron-down"></i></div>
-                                    <div class="item-content"></div>
+                                    <div class="item-header"><span>${build.substr(1)}&emsp;${date}</span><i class="fas fa-chevron-up"></i></div>
+                                    <div class="item-content">
+                                        <div style="text-align: center"><i class="fa fa-spinner fa-spin" style="font-size:24px"></i></div>
+                                    </div>
                                 </div>`
             }else{
                 items_html += `<div class="item">
@@ -134,48 +145,61 @@ async function citProgress(searchParams, userSettings){
         });
     }
 
-    $(insertionElm+" .ext-wrapper .stats-viewer .item .item-header i").on('click', async function(){
+    $(insertionElm+" .ext-wrapper .stats-viewer .item .item-header").on('click', async function(){
+        if(!navigator.onLine){
+            alert("Please Check Your Internet Connection!");
+        }
+        
         function reset(){
             $(insertionElm+" .ext-wrapper .stats-viewer .item .item-header i").addClass('fa-chevron-down'); $(insertionElm+" .ext-wrapper .stats-viewer .item .item-header i").removeClass('fa-chevron-up');
             $(insertionElm+" .ext-wrapper .stats-viewer .item .item-header i").find('item-content').hide();
         }
-        if($(this).hasClass('fa-chevron-down')){//open
+        if($(this).find('i').hasClass('fa-chevron-up')){//open
             // reset();
-            $(this).addClass('fa-chevron-up'); $(this).removeClass('fa-chevron-down');
-            $(this).parent().parent().children('item-content').show();
+            $(this).find('i').addClass('fa-chevron-down'); $(this).find('i').removeClass('fa-chevron-up');
+            $(this).parent().children('.item-content').show('fast');
+            if($(this).parent().find('.item-content .group').length > 0) return
         }else{//close
-            $(this).addClass('fa-chevron-down'); $(this).removeClass('fa-chevron-up');
-            $(this).find('item-content').hide();
+            $(this).find('i').addClass('fa-chevron-up'); $(this).find('i').removeClass('fa-chevron-down');
+            $(this).parent().children('.item-content').hide('fast');
+            return;
         }
-        var build = $(this).parent().parent().attr('build')
-        var output  = '';
+        var build = $(this).parent().attr('build')
+        var output  = '<div class="item-content_wrapper">';
         for(var i in citJson.xticks){
             if(citJson.xticks[i].includes(build)){
                 for(var j in citJson.series){
                     if(citJson.series[j].values[i].y > 0){
                         switch(citJson.series[j].key){
                             case 'No Run':
-                                var html = await getGroupHtml(citJson.series[j].values[i].url, userSettings)
-                                console.log("html: "+html);
+                                output += await getGroupHtml(citJson.series[j].values[i].url, "no-run", "No Run", userSettings)
                                 break;
                             case 'Environment Issue':
-                                console.log(citJson.xticks[i] +" -(Env Issue)-> "+ citJson.series[j].values[i].y);
+                                output += await getGroupHtml(citJson.series[j].values[i].url, "env-issue", "Environment Issue", userSettings)
                                 break;
                             case 'Not Analyzed':
-                                console.log(citJson.xticks[i] +" -(Not Analysed)-> "+ citJson.series[j].values[i].y);
+                                output += await getGroupHtml(citJson.series[j].values[i].url, "not-analysed", "Not Analysed", userSettings)
                                 break;
                             case 'Failed':
-                                console.log(citJson.xticks[i] +" -(Failed)-> "+ citJson.series[j].values[i].y);
+                                output += await getGroupHtml(citJson.series[j].values[i].url, "failed", "Failed", userSettings)
                             // case 'Passed':
                                 break;
-
                         }
                     }
-                    
                 }
                 break;
             }
         }
+        output += '</div>'
+        $(this).parent().find('.item-content').show()
+        $(this).parent().find('.item-content').html(output)
+        $(this).parent().find('.item-content table').css('width', '100%')
+
+        $(this).parent().find('table tbody>tr>td:nth-child(2)').on('click', function(){
+            var tester = $(this).html();
+            var URL = $(this).parent().parent().attr('url')
+            window.open(URL+"&res_tester="+tester, '_blank')
+        })
     })
-    // console.log(get_TC_Stats(URL))
+    
 }
