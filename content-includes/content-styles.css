@@ -217,6 +217,7 @@
 }
 .ext-wrapper table.stats-table thead tr>th:last-child{
     text-align: center;
+    width: 85px;
 }
 .ext-wrapper table.stats-table tbody tr>th{
     text-align: center;
@@ -236,8 +237,8 @@
 
 
 
-/*-----FEATURE: Tests to Analyse----*/
-.ext-testcase-analyser{
+/*-----FEATURE: Tests to Analyze----*/
+.ext-testcase-analyzer{
     margin-bottom: 10px;
     font-size: 13.5px;
 }
@@ -258,6 +259,7 @@
     display: flex;
     justify-content: space-between;
     min-width: 350px;
+    border-top: 1px solid #ccc;
 }
 .stats-viewer .item-header>:last-child{
     cursor: pointer
@@ -270,16 +272,19 @@
     display: block;
 }
 .stats-viewer .item-content .item-content_wrapper{
-    display: flex;
-    flex-direction: column;
+    display: block;
+    margin: auto;
+    width: 100%;
+    /* flex-direction: column; */
     /* justify-content: space-around; */
     align-items: center;
 }
 .stats-viewer .item-content .group{
     width: calc(100% - 5px);
-    display: flex;
-    flex-direction: column;
+    display: block;
+    /* flex-direction: column; */
     align-items: center;
+    margin: auto;
 }
 .group_title{
     color: #fcfcfc;
@@ -292,7 +297,7 @@
     background-color: #ccc;
     color: #000;
 }
-.group_title.not-analysed{
+.group_title.not-analyzed{
     background-color: #FF9233;
 }
 .group_title.failed{
@@ -302,4 +307,40 @@
     background-color: #9E229C;
 }
 
+.cit-progress.ext-wrapper table.stats-table{
+    margin: auto;
+}
 
+
+/* --------robot file copy button feature styles--------- */
+.robot-file-copy-btn{
+    position: absolute;
+    padding: 1px 5px;
+    background-color: #00000017;
+    cursor: pointer;
+    user-select: none;
+    border-radius: 2px;
+    right:0px;
+    bottom:0px;
+    color: #0000009c;
+}
+.robot-file-copy-btn:hover{
+    background-color: #00000025;
+}
+
+.ext-message-box{
+    position: absolute;
+    right: 20px;
+    bottom: 60px;
+    margin: 0px 20px 30px 0px;
+    /* background-color: #1449a3;
+    color: #fcfcfc; */
+    padding: 5px 10px;
+    border-radius: 3px;
+    font-weight: 500;
+    font-size: 15px;
+    box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+    background-color: #fcfcfc;
+    border-left: 2px solid #FF9233;
+    color: black;
+}

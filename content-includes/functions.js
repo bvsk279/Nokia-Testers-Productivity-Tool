@@ -232,3 +232,28 @@ async function get_TC_Stats(reqApiUrl, userSettings){
     statsHTML += "<tr><th></th><td><b>Grand total</b></td><td><b>"+names.length+"</b></td></tr></tbody>";
     return statsHTML;
 }
+
+const sendMessage = (messageText, insertionElm, addStyles) =>{
+    if(!addStyles) addStyles="";
+    messagebox = insertionElm+" .ext-message-box"
+    if($(messagebox).length > 0){
+        $(messagebox).html(messageText)
+        $(messagebox).hide();
+        clearTimeout(window.x); clearTimeout(window.xin);
+    }else{
+        $(insertionElm).append(`<div class='ext-message-box' style="${addStyles}+;display:none">${messageText}</div>`)
+    }
+
+    setTimeout(function(){
+        var currentMargin = "30px"
+        $(messagebox).css({'transition':'unset', 'margin-right':'calc('+currentMargin+' - 8px)'})
+        $(messagebox).show();
+        $(messagebox).css({'transition':'0.1s ease-in','margin-right':currentMargin})
+        window.x = setTimeout(function(){
+            $(messagebox).css({'margin-right':'calc('+currentMargin+' - 8px)'})
+            window.xin = setTimeout(function(){
+                $(messagebox).hide();
+            },100)
+        },3000)
+    },200)
+}

@@ -35,8 +35,8 @@ if(window.location.hostname == repPortalHostName){
                 statsHTML = statsHTML.replace('<tbody>', '')
                 statsHTML = statsHTML.replace('</tbody>', '')
                 
-                if($(insertionElm).find(".ext-wrapper").length == 0){
-                    $(insertionElm).append(`<div class='ext-wrapper'>
+                if($(insertionElm).find(".ext-wrapper#team-progress").length == 0){
+                    $(insertionElm).append(`<div class='ext-wrapper' id='team-progress' style='order:2'>
                                                             <div class='report-stats'>
                                                                 <div class='stats-view-btn ext-action-btn'>Team&nbsp;Progress&ensp;<i class='fas fa-chart-bar'></i></div>
                                                                 <div class='stats-viewer'>
@@ -60,27 +60,26 @@ if(window.location.hostname == repPortalHostName){
                                                         </div>`
                     );
                     //const header = $('.top-panel .view-title')
-                    console.log(userSettings)
                     if(userSettings.repPortal.isTeamProgressOpen != true)
-                        $(insertionElm+" .ext-wrapper .report-stats .stats-viewer").hide();
-                    $(insertionElm+' .ext-wrapper .report-stats .stats-view-btn').on("click", (event) => {
+                        $(insertionElm+" .ext-wrapper#team-progress .report-stats .stats-viewer").hide();
+                    $(insertionElm+' .ext-wrapper#team-progress .report-stats .stats-view-btn').on("click", (event) => {
                         // console.log("Team progress click detected")
                         event.stopPropagation();
-                        $(insertionElm+" .ext-wrapper .report-stats .stats-viewer").toggle();
+                        $(insertionElm+" .ext-wrapper#team-progress .report-stats .stats-viewer").toggle();
 
                         //Setting Team Progress Visibility
-                        if($(insertionElm+' .ext-wrapper .report-stats .stats-viewer').is(":visible") == true){
+                        if($(insertionElm+' .ext-wrapper#team-progress .report-stats .stats-viewer').is(":visible") == true){
                             toogleTeamProgress(true)
                         }else toogleTeamProgress(false)
 
                     })
-                    $(insertionElm+" .ext-wrapper .report-stats .stats-viewer").on("click", (event) => {
+                    $(insertionElm+" .ext-wrapper#team-progress .report-stats .stats-viewer").on("click", (event) => {
                         event.stopPropagation();
                     })
 
                     $(window).click(() => {
-                        if($(insertionElm+' .ext-wrapper .report-stats .stats-viewer').is(":visible") == true){
-                            $(insertionElm+" .ext-wrapper .report-stats .stats-viewer").hide();
+                        if($(insertionElm+' .ext-wrapper#team-progress .report-stats .stats-viewer').is(":visible") == true){
+                            $(insertionElm+" .ext-wrapper#team-progress .report-stats .stats-viewer").hide();
                             toogleTeamProgress(false)
                         }
                     });
@@ -89,12 +88,12 @@ if(window.location.hostname == repPortalHostName){
                         location.reload();
                     })
                 }else{
-                    $(insertionElm).find(".ext-wrapper .stats-viewer table tbody").html(statsHTML);
+                    $(insertionElm).find(".ext-wrapper#team-progress .stats-viewer table tbody").html(statsHTML);
                 }
                 
 
                 //Click res tester to filter his/her cases
-                $(insertionElm+' .ext-wrapper .report-stats .stats-viewer table tbody tr td.tester-name').on("click", function(e){
+                $(insertionElm+' .ext-wrapper#team-progress .report-stats .stats-viewer table tbody tr td.tester-name').on("click", function(e){
                     var respTester = $(this).html();
                     const url = new URL(window.location);
                     url.searchParams.set('res_tester', respTester);
@@ -105,7 +104,7 @@ if(window.location.hostname == repPortalHostName){
         }
 
 
-        function parseTestsToAnalyse(searchParams, userSettings){
+        function parseTestsToAnalyze(searchParams, userSettings){
             // const header = "[container-id=\"'body'\"] .ui-grid-header-cell [role='columnheader'] span.ui-grid-header-cell-label";
             const header = "[container-id=\"'body'\"] .ui-grid-header-cell [role='columnheader']";
             const newCellWidth = 250; //px
@@ -176,7 +175,7 @@ if(window.location.hostname == repPortalHostName){
                 
             }
         }
-//TODO: ADD chrome.onInstall Action. To show buttons right after the Extention is added to chrome
+        //TODO: ADD chrome.onInstall Action. To show buttons right after the Extention is added to chrome
 
 
 
@@ -187,17 +186,17 @@ if(window.location.hostname == repPortalHostName){
         if(data.nokiaUserSettings){
             userSettings = JSON.parse(data.nokiaUserSettings)
             function repPortalPageInit(load){
-                //Tests to analyse feature
+                //Tests to analyze feature
                 if(window.location.pathname == "/reports/test-runs/"){
                     $(function(){
                         $(".main-container").ready(function() {
                             setTimeout(function(){
-                                if($(".main-container h2.table-title .ext-testcase-analyser").length == 0){
-                                    $(".main-container h2.table-title").append("<div class='ext-testcase-analyser ext-action-btn'>Analyse Errors&ensp;<i class='fas fa-flask'></i></div>");
+                                if($(".main-container h2.table-title .ext-testcase-analyzer").length == 0){
+                                    $(".main-container h2.table-title").append("<div class='ext-testcase-analyzer ext-action-btn'>Analyze&nbsp;Errors&ensp;<i class='fas fa-flask'></i></div>");
                                 }
-                                $(".main-container .ext-testcase-analyser").on("click", function(){
+                                $(".main-container .ext-testcase-analyzer").on("click", function(){
                                     clearInterval(spinnerInterval);
-                                    parseTestsToAnalyse(window.location.search, userSettings);
+                                    parseTestsToAnalyze(window.location.search, userSettings);
                                 })
                             }, 1000)
                         })
@@ -217,7 +216,32 @@ if(window.location.hostname == repPortalHostName){
                         })
                     })
                 }else{
-                    if($(".main-container .ext-testcase-analyser").length) $(".main-container .ext-testcase-analyser").remove();
+                    if($(".main-container .ext-testcase-analyzer").length) $(".main-container .ext-testcase-analyzer").remove();
+                }
+
+
+                //Robot File Path Copy button Generation Feature
+                if(window.location.pathname == "/reports/qc/"){
+                    setTimeout(function(){
+                        $(".navbar-container").ready(function() {
+                            if($(".navbar-container .rep-title ").find('.ext-wrapper#robot-path-copy-btn-generator').length == 0){
+                                $(".navbar-container .rep-title").append(`<div class='ext-wrapper' id='robot-path-copy-btn-generator' style='order:3'>
+                                                                        <div class='report-stats'>
+                                                                            <div class='stats-view-btn ext-action-btn'>Get&nbsp;Robot&nbsp;Paths</div>
+                                                                        </div>
+                                                                    </div>`);
+                                $('.navbar-container #robot-path-copy-btn-generator').on('click', function(){
+                                    generateRobotFileCopyBtn(window.location.hostname);
+                                })
+                            };
+                        })
+                    },1000)
+                }
+                //Ext Elements Remover
+                else{
+                    $(".navbar-container").ready(function() {
+                        if($(".navbar-container .ext-wrapper").length) $(".navbar-container .ext-wrapper").remove();
+                    })
                 }
             }
             
@@ -252,8 +276,6 @@ if(window.location.hostname == repPortalHostName){
             //     }
             // })
 
-            
-
 
             //CIT Charts Page - CIT Progress Featutre
             if(window.location.pathname == "/charts/cit_build_progress/"){
@@ -263,9 +285,4 @@ if(window.location.hostname == repPortalHostName){
         }
     })
 
-    if(window.location.pathname != "/reports/qc/"){
-        $(".navbar-container").ready(function() {
-            if($(".navbar-container .ext-wrapper").length) $(".navbar-container .ext-wrapper").remove();
-        })
-    }
-}
+}   

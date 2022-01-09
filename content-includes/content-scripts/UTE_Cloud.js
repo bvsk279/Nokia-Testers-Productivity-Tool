@@ -7,8 +7,11 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
     //API = "https://rep-portal.wroclaw.nsn-rdnet.net/api/automatic-test/runs/report/?fields=no,id,result_color,url,qc_test_instance__m_path,qc_test_set,test_case__qc_instance_number,test_case__name,hyperlink_set__test_logs_url,rain_url,configuration,qc_test_instance__res_tester,end,result,env_issue_type,comment,test_line,test_col__testline_type,builds,qc_test_instance__organization,pronto&limit=25&user_stats=flag%253Dtests_to_analyze%2526is_99_planned%253DFalse%2526username%253Dbelvenka"
     var scriptLoaded = false;
     const updateUteCloudPage = (userSettings) => {
+        var navHeight = $('header nav').css('height')
+        var popMessageStyles = 'font-size:1em; margin-bottom: -10px; background-color: #1449a3; color: #fcfcfc; top: calc('+navHeight+' + 10px); bottom: unset;';
+        //TODO: optimizing the loading using window.loaded array variable and storing the loading statuses in the same
         var rows = parseInt($('.page-size').html()) || 30;
-        setTimeout(function(){  
+        setTimeout(function(){ 
             for(var i = 0; i<rows; i++){
                 var endTime = $("tr[data-index='"+i+"'] td.cell-res_end .crop").html();
                 var detectAlarmId = null
@@ -46,15 +49,17 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                             $('#table tr[data-index='+i+'] td:nth-child(1)').css({"border-left": "3px solid red"});
                             break;
                     }
-                //}
+                // }
                 
 
 
-
                 //Adding Build Detail & TL Name
-                if($("#table tr[data-index='"+i+"'] td.cell-type .crop .build-detail").length > 0){
+                var yesterday = new Date(new Date().getTime() - 24*60*60*1000);
+                var reservationStart = new Date($("#table tr[data-index='"+i+"'] td.cell-res_start .crop").html());
+                if($("#table tr[data-index='"+i+"'] td.cell-type .crop .build-detail").length == 0 && yesterday<=reservationStart){
                     //console.log(i+" contains build detail");
-                }else{
+                // }else{
+                    // var URLPath = $("tr[data-index='"+i+"'] td.cell-uuid_or_id a").attr('href');
                     var URL = "https://cloud.ute.nsn-rdnet.net" + URLPath;
 
                     async function onCommit(URL, i, status) {
@@ -68,10 +73,13 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                                 //console.log("Build detail is available for "+i+" : "+$("#table tr[data-index='"+i+"'] td.cell-type .crop").has('.build-detail').length)
                                 if($("#table tr[data-index='"+i+"'] td.cell-type .crop").has('.build-detail').length == 0){
                                     $("#table tr[data-index='"+i+"'] td.cell-type .crop").append(' <span class="build-detail ext-elm-tag" title="Click to Copy Build">'+buildDetailHTML+'</span>');
-                                    $("#table tr[data-index='"+i+"'] td.cell-type .crop .build-detail").on("click", function(){extExecCopy(buildDetail, "Build Detail Copied!")})
+                                    $("#table tr[data-index='"+i+"'] td.cell-type .crop .build-detail").on("click", function(){
+                                        extExecCopy(buildDetail)
+                                        sendMessage("Build Detail Copied!", "body", popMessageStyles);
+                                    })
                                 }
                                 //break;
-                            }  
+                            }
                         }
 
                         if($("#table tr[data-index='"+i+"'] td.cell-type .crop").has('.tl-name').length == 0){
@@ -81,6 +89,10 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                                     tlName = tlName.split("</span>: ")[1] || NaN;
                                     //console.log(tlName);
                                     $("#table tr[data-index='"+i+"'] td.cell-type .crop").append(' <span class="tl-name ext-elm-tag">'+tlName+'</span>');
+                                    $("#table tr[data-index='"+i+"'] td.cell-type .crop .tl-name").on("click", function(){
+                                        extExecCopy(tlName)
+                                        sendMessage("Testline Name Copied!", "body", popMessageStyles);
+                                    })
                                     //return;
                                 }
                                 //console.log(k);
@@ -96,7 +108,10 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                                     var ipAddr = dom_nodes.find(targetElm).eq(k).html();
                                     ipAddr = ipAddr.split("</span>: ")[1] || NaN;
                                     $("#table tr[data-index='"+i+"'] td.cell-uuid_or_id").append(' <button class="copy-ip-address" style="margin-left: 10px" title="Copy IP Address"><i class="far fa-copy"></i></button>');
-                                    $("#table tr[data-index='"+i+"'] td.cell-uuid_or_id .copy-ip-address").on("click", function(){extExecCopy(ipAddr, "IP Address Copied!")})
+                                    $("#table tr[data-index='"+i+"'] td.cell-uuid_or_id .copy-ip-address").on("click", function(){
+                                        extExecCopy(ipAddr)
+                                        sendMessage("VM IP Address Copied!", "body", popMessageStyles);
+                                    })
                                     //return;
                                 }
                                 //console.log(k);
@@ -116,6 +131,33 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
     
     const loadExecutionStatus = (userSettings) => {
         setTimeout(function(){
+            $("#table tbody tr").each(function(){
+                var execStatus = $(this).find('.cell-status .crop').html()
+                //var idElm = $(this).find('.cell-id');
+                //console.log(execStatus.trim());
+                if(execStatus){
+                    switch(execStatus.trim()){
+                        case "Execution finished":
+                            $(this).addClass('green-indication');
+                            break;
+                        case "Dry run failure":
+                        case "Execution canceled":
+                            $(this).addClass('red-indication');
+                            break;
+                        case "Testline pending":
+                        case "Execution pending":
+                        case "Execution started":
+                        case "Dry run started":
+                        case "Dry run pending":
+                            $(this).addClass('orange-indication');
+                            break;
+                        default:
+                            $(this).addClass('grey-indication');
+                            break;
+                    }
+                } 
+            })
+            
             //Setting the ID filed width Start
             var elm = $('#table thead tr th.cell-id .th-inner')
             var isWiden = userSettings.uteCloud.execPage.isIdExtended || false
@@ -123,9 +165,10 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                 elm.find('i.fas').removeClass('fa-chevron-right')
                 elm.find('i.fas').addClass('fa-chevron-left')
                 $("#table thead tr th.cell-id, #table tbody tr td.cell-id").css('width', '40ch')  
-            }//Setting the ID filed width END
+            }//Setting the ID field width END
+            
             $("#table tbody tr td.cell-id").each(function(){
-                if($(this).find('.ext-elm').length == 0){
+                if($(this).length > 0 && $(this).find('.ext-elm').length == 0 && $(this).css('visibility') == 'visible'){
                     let executionLink = uteHostName+$(this).find(".crop a").attr('href');
                     //console.log("Link: "+$(this).find(".crop a").attr('href'));
                     async function commit(thisElm, execURL, execStatus){
@@ -176,33 +219,30 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                     //}
                 }
             })
-
-            $("#table tbody tr").each(function(){
-                var execStatus = $(this).find('.cell-status .crop').html()
-                //var idElm = $(this).find('.cell-id');
-                //console.log(execStatus.trim());
-                if(execStatus){
-                    switch(execStatus.trim()){
-                        case "Execution finished":
-                            $(this).addClass('green-indication');
-                            break;
-                        case "Dry run failure":
-                        case "Execution canceled":
-                            $(this).addClass('red-indication');
-                            break;
-                        case "Testline pending":
-                        case "Execution pending":
-                        case "Execution started":
-                        case "Dry run started":
-                            $(this).addClass('orange-indication');
-                            break;
-                        default:
-                            $(this).addClass('grey-indication');
-                            break;
+            $('ul.pagination li, #search_button').on('click', function(){
+                var x = setInterval(function(){
+                    // setTimeout(function(){
+                    //     $('ul.pagination li, #search_button').on('click', function(){
+                    //         var x = setInterval(function(){
+                    //             console.log("interval execution...")
+                    //             if($('.fixed-table-loading').css('display') == 'none'){
+                    //                 setTimeout(function(){
+                    //                     loadExecutionStatus(userSettings)
+                    //                 }, 1000)
+                    //                 clearInterval(x)
+                    //             }
+                    //         }, 1000);
+                    //     })
+                    // },1000)
+                    if($('.fixed-table-loading').css('display') == 'none'){
+                        setTimeout(function(){
+                            loadExecutionStatus(userSettings)
+                        }, 500)
+                        clearInterval(x)
                     }
-                }
-                
+                }, 500);
             })
+
         }, 1000)
     }
 
@@ -215,7 +255,7 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                     updateUteCloudPage(userSettings);
                     setTimeout(function(){ 
                         $("table thead .cell-uuid_or_id .th-inner").append(" <span class='ext-elm'>&ensp;|&ensp;IP</span>");
-                        $('ul.pagination li a').on('click', function(){updateUteCloudPage(userSettings)});
+                        // $('ul.pagination li a').on('click', function(){updateUteCloudPage(userSettings)});
 
                         //Link hover makes type cell hover
                         $("#table tbody tr td:first-child").hover(function(){
@@ -240,8 +280,33 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                         })
                     }, 1000)
                 })
+                // $('#table').ready(function(){
+                //     var x = setInterval(function(){
+                //         if($('#table tbody tr td.cell-type').length > 0){
+                //             setTimeout(function(){
+                //                 setTimeout(function(){window.load = true}, 20000)
+                //                 updateUteCloudPage(userSettings)
+                //                 //On Page Click
+                //                 $('ul.pagination li').on('click', function(){
+                //                     window.load = false
+                //                     x = setInterval(function(){
+                //                         if($('#table tbody tr td.cell-type').length > 0){
+                //                             setTimeout(function(){
+                //                                 setTimeout(function(){window.load = true}, 20000)
+                //                                 updateUteCloudPage(userSettings)
+                //                             }, 500)
+                //                             clearInterval(x)
+                //                         }
+                //                     }, 500);
+                //                 })
+                //             }, 500)
+                //             clearInterval(x)
+                //         }
+                //     }, 500);
 
-                var x = setInterval(function(){updateUteCloudPage(userSettings)}, 2000); //Timer function
+                var y = setInterval(function(){
+                    updateUteCloudPage(userSettings)
+                }, 2000); //Timer function
             }
 
 
@@ -250,10 +315,15 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
             //Execution Status
             if(window.location.pathname == "/execution/search/"){
                 $('#table').ready(function(){
-                    var x = setInterval(function(){loadExecutionStatus(userSettings)}, 1000);
-                    setTimeout(function(){
-                        clearInterval(x);
-                    },20000)
+                    var x = setInterval(function(){
+                        if($('#table tbody tr td.cell-id').find('a').length > 0){
+                            setTimeout(function(){
+                                loadExecutionStatus(userSettings)
+                            }, 500)
+                            clearInterval(x)
+                        }
+                    }, 500);
+                    
 
                     var elm = $('#table thead tr th.cell-id .th-inner')
                         if(elm.find('.ext-elm').length == 0)

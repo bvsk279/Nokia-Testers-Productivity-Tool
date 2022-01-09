@@ -31,7 +31,7 @@ async function getGroupHtml(url, className, title, userSettings){
                                 <tr>
                                     <th>&emsp;</th>
                                     <th>Responsible Tester</th>
-                                    <th>TC Count</th>
+                                    <th>TI Count</th>
                                 </tr>
                             </thead>
                             <tbody url="${url}">
@@ -52,7 +52,7 @@ async function citProgress(searchParams, userSettings){
 
     const citJson = await getJsonData(URL);
     var seriesData = [];
-    var series = {noRun:null, envIssue:null, notAnalysed:null, failed:null, blocked:null}
+    var series = {noRun:null, envIssue:null, notAnalyzed:null, failed:null, blocked:null}
     for(var i in citJson.series){
         switch(citJson.series[i].key){
             case 'No Run':
@@ -62,7 +62,7 @@ async function citProgress(searchParams, userSettings){
                 series.envIssue = citJson.series[i]
                 break;
             case 'Not Analyzed':
-                series.notAnalysed = citJson.series[i]
+                series.notAnalyzed = citJson.series[i]
                 break;
             case 'Failed':
                 series.failed = citJson.series[i]
@@ -74,18 +74,21 @@ async function citProgress(searchParams, userSettings){
     }
     if(series.noRun) seriesData.push(series.noRun)
     if(series.envIssue) seriesData.push(series.envIssue)
-    if(series.notAnalysed) seriesData.push(series.notAnalysed)
+    if(series.notAnalyzed) seriesData.push(series.notAnalyzed)
     if(series.failed) seriesData.push(series.failed)
     if(series.blocked) seriesData.push(series.blocked)
     
 
     citJson.series = seriesData;
-    console.log(citJson);
+    // console.log(citJson);
     var items_html = ``;
     for(var i in citJson.xticks){
         var build = citJson.xticks[i].split(" ")[0];
         var date = citJson.xticks[i].split(" ")[1];
-        var toBeShown = false;
+        //     const months = ['Jan','Feb','Mar','Apr','May','June','July','Aug','Sep','Oct','Nov','Dec'];
+        //     var dateSplit = date.split('-')
+        //     var dateFormat = dateSplit[2]+'-'+months[parseInt(dateSplit[1])-1]+'-'+dateSplit[0]
+        // var toBeShown = false;
         if(build.includes('_')){
 
             if(citJson.xticks[i].includes(build)){
@@ -107,19 +110,27 @@ async function citProgress(searchParams, userSettings){
                                     <div class="item-header" style="background-color: rgb(107, 194, 20)"><span>${build.substr(1)}&emsp;${date}</span><span>All Passed</span></div>
                                 </div>`
             }
-            
 
         }
     }
-    
+
+    function getCurrentTime() {
+        var date = new Date();
+        var hours = date.getHours();
+        var minutes = date.getMinutes();
+        var ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12;
+        minutes = minutes < 10 ? '0'+minutes : minutes;
+        return hours + ':' + minutes + ' ' + ampm;
+    }
     
     const insertionElm = '.navbar-header'
     if($(insertionElm).find(".ext-wrapper").length == 0){
-        $(insertionElm).append(`<div class='ext-wrapper'>
+        $(insertionElm).append(`<div class='ext-wrapper cit-progress'>
                                     <div class='report-stats'>
                                         <div class='stats-view-btn ext-action-btn'>CIT&nbsp;Progress&ensp;<i class='fas fa-chart-bar'></i></div>
                                         <div class="stats-viewer">
-                                            <!-- <div class="cases-type unknownn"> <span style="font-size: 0.8em">cases</span></div> -->
+                                            <div class="cases-type" style="text-transform:unset; display: block">Last Loaded At <span>${getCurrentTime()}</span></div>
                                             <div class="stats-wrapper">
                                                 ${items_html}
                                             </div>
@@ -178,7 +189,7 @@ async function citProgress(searchParams, userSettings){
                                 output += await getGroupHtml(citJson.series[j].values[i].url, "env-issue", "Environment Issue", userSettings)
                                 break;
                             case 'Not Analyzed':
-                                output += await getGroupHtml(citJson.series[j].values[i].url, "not-analysed", "Not Analysed", userSettings)
+                                output += await getGroupHtml(citJson.series[j].values[i].url, "not-analyzed", "Not Analyzed", userSettings)
                                 break;
                             case 'Failed':
                                 output += await getGroupHtml(citJson.series[j].values[i].url, "failed", "Failed", userSettings)
@@ -201,5 +212,5 @@ async function citProgress(searchParams, userSettings){
             window.open(URL+"&res_tester="+tester, '_blank')
         })
     })
-    
+
 }
