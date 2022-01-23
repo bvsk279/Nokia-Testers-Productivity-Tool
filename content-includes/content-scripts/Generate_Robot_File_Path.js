@@ -11,7 +11,9 @@ function generateRobotFileCopyBtn(hostName){
                     var url = "https://"+hostName+"/api/qc/instances/?fields=test_suite&id="+instanceId;
                     var resultJson = await getJsonData(url);
                     var robotFilePath = resultJson[0].test_suite
-                    $(this).find('.ag-cell').eq(index).find('.ag-cell-wrapper').append('<a onclick="return false;" href="https://verify.this/'+tiName+'" class="robot-file-copy-btn" title="Copy Robot File Path"><i class="far fa-copy"></i></a>')
+                    var robotCopyBtnHtml = (robotFilePath && robotFilePath != "") ? '<a onclick="return false;" href="https://verify.this/'+tiName+'" class="robot-file-copy-btn" title="Copy Robot File Path"><i class="far fa-copy"></i></a>'
+                                                            : '<a onclick="return false;" href="#" class="robot-file-copy-btn" title="No Robot File Path"><i class="fas fa-ban"></i></a>'
+                    $(this).find('.ag-cell').eq(index).find('.ag-cell-wrapper').append(robotCopyBtnHtml)
                     $(this).find('.ag-cell').eq(index).find('.ag-cell-wrapper .robot-file-copy-btn').on('click', function(){
                         extExecCopy(robotFilePath)
                         sendMessage('Robot File Path Copied!', '.main-container', 'font-size:0.9em')

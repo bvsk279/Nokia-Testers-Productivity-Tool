@@ -54,9 +54,10 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
 
 
                 //Adding Build Detail & TL Name
+                var reservationDate = $("#table tr[data-index='"+i+"'] td.cell-req_date .crop").html()
                 var yesterday = new Date(new Date().getTime() - 24*60*60*1000);
-                var reservationStart = new Date($("#table tr[data-index='"+i+"'] td.cell-res_start .crop").html());
-                if($("#table tr[data-index='"+i+"'] td.cell-type .crop .build-detail").length == 0 && yesterday<=reservationStart){
+                var resDate = new Date(reservationDate);
+                if($("#table tr[data-index='"+i+"'] td.cell-type .crop .build-detail").length == 0 && yesterday<=resDate){
                     //console.log(i+" contains build detail");
                 // }else{
                     // var URLPath = $("tr[data-index='"+i+"'] td.cell-uuid_or_id a").attr('href');

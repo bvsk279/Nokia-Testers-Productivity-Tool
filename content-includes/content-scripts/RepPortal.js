@@ -227,7 +227,7 @@ if(window.location.hostname == repPortalHostName){
                             if($(".navbar-container .rep-title ").find('.ext-wrapper#robot-path-copy-btn-generator').length == 0){
                                 $(".navbar-container .rep-title").append(`<div class='ext-wrapper' id='robot-path-copy-btn-generator' style='order:3'>
                                                                         <div class='report-stats'>
-                                                                            <div class='stats-view-btn ext-action-btn'>Get&nbsp;Robot&nbsp;Paths</div>
+                                                                            <div class='stats-view-btn ext-action-btn'>Load&nbsp;Robot&nbsp;Paths&ensp;<i class="fas fa-cloud-download-alt"></i></div>
                                                                         </div>
                                                                     </div>`);
                                 $('.navbar-container #robot-path-copy-btn-generator').on('click', function(){

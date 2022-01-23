@@ -14,6 +14,12 @@ const uteHostName = "https://rep-portal.wroclaw.nsn-rdnet.net";
 
 async function getGroupHtml(url, className, title, userSettings){
     var params = url.split('?')[1]
+    var bg_style = "background-color:";
+    bg_style += (className == 'no-run') ? "#ccc"
+                : (className == 'env-issue') ? "#9E229C"
+                : (className == 'not-analyzed') ? "#FF9233"
+                : (className == 'failed') ? "red"
+                : "#111"
 
     let reportApi = uteHostName+'/api/qc-beta/instances/report/?build='+getSearchParam(params, 'build')+'&cit_id='+getSearchParam(params, 'cit_id')+'&fields=res_tester&limit=1000&extension_request=true';
     // console.log(reportApi);
@@ -21,17 +27,23 @@ async function getGroupHtml(url, className, title, userSettings){
     var dom_nodes = $($.parseHTML(statsHTML));
     // console.log(dom_nodes.html());
     var count = dom_nodes.find('tr:last-child>td:last-child>b').html();
+    var cell_styles = "border: 1px solid #ccc; padding: 3px 5px; line-height: 20px;";
+    dom_nodes.find("tr>td, tr>th").each(function(){
+        $(this).attr('style', cell_styles)
+    })
     dom_nodes.find('tr:last-child').remove();
     var groupHTML = ``
     if(statsHTML){
+        var grp_title_styles = "font-weight: bold; padding: 2px 10px; width: 100%; padding-top: 5px";
+        var table_styles = "width: 350px; border-collapse: collapse; border: 1px solid #ccc;";
         groupHTML += `<div class="group" style="font-size: 0.9em">
-                        <div class="group_title ${className}">${title}&ensp;(&nbsp;${count}&nbsp;) &ensp; <a target='_blank' href='${url}' style='color:inherit; padding: 3px 5px'><i class="fas fa-link"></i></a></div>
-                        <table class="stats-table" style="font-size: 1.1em">
-                            <thead>
+                        <div class="group_title ${className}" style="${grp_title_styles};${bg_style}"><span>${title}&ensp;(&nbsp;${count}&nbsp;)</span> &ensp; <a target='_blank' href='${uteHostName}${url}' style='color:inherit; padding: 3px 5px'><i class="fas fa-link"></i></a></div>
+                        <table class="stats-table" style="font-size: 1.1em; ${table_styles}">
+                            <thead> 
                                 <tr>
-                                    <th>&emsp;</th>
-                                    <th>Responsible Tester</th>
-                                    <th>TI Count</th>
+                                    <th style="${cell_styles}">&emsp;</th>
+                                    <th style="${cell_styles}">Responsible Tester</th>
+                                    <th style="${cell_styles}">TI Count</th>
                                 </tr>
                             </thead>
                             <tbody url="${url}">
@@ -48,7 +60,12 @@ async function citProgress(searchParams, userSettings){
     var competenceArea = getSearchParam(searchParams, 'ca');
     var ft = getSearchParam(searchParams, 'ft');
 
-    var URL = uteHostName+"/api/charts/cit_build_progress/?ca__pos_neg="+competenceArea+"&from="+ft.split(',')[0]+"&promotion__pos_neg=\"CIT\"&swbranch=SRAN+SBTS00+COMMON"+"&to="+ft.split(',')[1]
+    var swbranch = getSearchParam(searchParams, 'swbranch')
+    var branch = getSearchParam(searchParams, 'branch')
+    var build = ""
+    if(swbranch) build = "swbranch="+swbranch
+    else if(branch) build = "branch="+branch
+    var URL = uteHostName+"/api/charts/cit_build_progress/?ca__pos_neg="+competenceArea+"&from="+ft.split(',')[0]+"&promotion__pos_neg=\"CIT\"&"+build+"&to="+ft.split(',')[1]
 
     const citJson = await getJsonData(URL);
     var seriesData = [];
@@ -81,6 +98,8 @@ async function citProgress(searchParams, userSettings){
 
     citJson.series = seriesData;
     // console.log(citJson);
+
+    var item_hdr_styles = `padding: 5px 8px; font-weight: bold; background-color: #636363 !important; color: #fcfcfc; min-width: 350px; border-top: 1px solid #ccc`
     var items_html = ``;
     for(var i in citJson.xticks){
         var build = citJson.xticks[i].split(" ")[0];
@@ -95,12 +114,12 @@ async function citProgress(searchParams, userSettings){
                 var TC_Count = 0;
                 for(var j in citJson.series){
                     TC_Count += citJson.series[j].values[i].y
-                }    
+                }
             }
 
             if(TC_Count > 0){
                 items_html += `<div class="item" build='${build}'>
-                                    <div class="item-header"><span>${build.substr(1)}&emsp;${date}</span><i class="fas fa-chevron-up"></i></div>
+                                    <div class="item-header" style="${item_hdr_styles}"><span>${build.substr(1)}&emsp;${date}</span><i class="fas fa-chevron-up"></i></div>
                                     <div class="item-content">
                                         <div style="text-align: center"><i class="fa fa-spinner fa-spin" style="font-size:24px"></i></div>
                                     </div>
@@ -131,7 +150,7 @@ async function citProgress(searchParams, userSettings){
                                         <div class='stats-view-btn ext-action-btn'>CIT&nbsp;Progress&ensp;<i class='fas fa-chart-bar'></i></div>
                                         <div class="stats-viewer">
                                             <div class="cases-type" style="text-transform:unset; display: block">Last Loaded At <span>${getCurrentTime()}</span></div>
-                                            <div class="stats-wrapper">
+                                            <div class="stats-wrapper" style="width:100%; max-width:500px">
                                                 ${items_html}
                                             </div>
                                         </div>
