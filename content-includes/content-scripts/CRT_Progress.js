@@ -1,27 +1,24 @@
-//api: https://rep-portal.wroclaw.nsn-rdnet.net/api/charts/cit_build_progress/?ca__pos_neg=%22RAN_L2_SW_BLR_2%22&from=2021-11-20&promotion__pos_neg=%22CIT%22&swbranch=SRAN+SBTS00+COMMON&to=2021-12-15
+window.CRT_STATUS_CLICK = false;
 
-//CIT Individual report: https://rep-portal.wroclaw.nsn-rdnet.net/api/qc-beta/instances/report/?build=SBTS00_ENB_9999_211213_000005&cit_id=:hash:55d5f8933c916e93ea03f743159ea204&fields=res_tester&limit=1000
-const uteHostName = "https://rep-portal.wroclaw.nsn-rdnet.net";
+function getCurrentTime() {
+    var date = new Date();
+    var hours = date.getHours();
+    var minutes = date.getMinutes();
+    var ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12;
+    minutes = minutes < 10 ? '0'+minutes : minutes;
+    return hours + ':' + minutes + ' ' + ampm;
+}
 
-// async function buildItemHtml(url){
-//     var params = url.split('?')
-
-//     let reportApi = uteHostName+'/api/qc-beta/instances/report/?build='+getSearchParam(params, 'build')+'&cit_id='+getSearchParam(params, 'cit_id')+'&fields=res_tester&limit=1000';
-//     let data = await getJsonData(reportApi);
-//     return 
-
-// }
-
-async function getGroupHtml(url, className, title, userSettings){
+async function get_CRT_GroupHtml(url, className, title, userSettings){
     var params = url.split('?')[1]
     var bg_style = "background-color:";
     bg_style += (className == 'no-run') ? "#ccc"
-                : (className == 'env-issue') ? "#9E229C"
-                : (className == 'not-analyzed') ? "#FF9233"
+                : (className == 'passed') ? "rgb(107, 194, 20)"
                 : (className == 'failed') ? "red"
                 : "#111"
 
-    let reportApi = uteHostName+'/api/qc-beta/instances/report/?build='+getSearchParam(params, 'build')+'&cit_id='+getSearchParam(params, 'cit_id')+'&fields=res_tester&limit=1000&extension_request=true';
+    let reportApi = uteHostName+'/api/qc-beta/instances/report/?'+'id__in='+getSearchParam(params, 'id')+'&fields=res_tester&limit=1000&extension_request=true';
     // console.log(reportApi);
     var statsHTML = await get_TC_Stats(reportApi, userSettings)
     var dom_nodes = $($.parseHTML(statsHTML));
@@ -36,7 +33,7 @@ async function getGroupHtml(url, className, title, userSettings){
     if(statsHTML){
         var grp_title_styles = "font-weight: bold; padding: 2px 10px; width: 100%; padding-top: 5px";
         var table_styles = "width: 350px; border-collapse: collapse; border: 1px solid #ccc;";
-        if(userSettings.repPortal.cit_chart_page.display_categories.includes(className)){
+        if(userSettings.repPortal.crt_chart_page.display_categories.includes("crt_"+className)){
             groupHTML += `<div class="group" style="font-size: 0.9em">
                         <div class="group_title ${className}" style="${grp_title_styles};${bg_style}"><span>${title}&ensp;(&nbsp;${count}&nbsp;)</span> &ensp; <a target='_blank' href='${uteHostName}${url}' style='color:inherit; padding: 3px 5px'><i class="fas fa-link"></i></a></div>
                         <table class="stats-table" style="font-size: 1.1em; ${table_styles}">
@@ -53,7 +50,7 @@ async function getGroupHtml(url, className, title, userSettings){
                         </table>
                     </div>`
         }else{
-            groupHTML += `<div class="group" style="font-size: 0.9em">
+            groupHTML += `<div class="group" style="font-size: 0.9em" title="Turn On - Display Passed Cases Category in Settings to Show the List">
                         <div class="group_title ${className}" style="${grp_title_styles};${bg_style}"><span>${title} cases exists &ensp;(&nbsp;${count}&nbsp;)</span></div>
                     </div>`
         }
@@ -63,97 +60,75 @@ async function getGroupHtml(url, className, title, userSettings){
     return groupHTML;
 }
 
-async function citProgress(searchParams, userSettings){
-    var competenceArea = getSearchParam(searchParams, 'ca');
-    var ft = getSearchParam(searchParams, 'ft');
+async function crtProgress(searchParams, userSettings){
+    let competenceArea = getSearchParam(searchParams, 'ca');
+    let releases = getSearchParam(searchParams, 'releases');
+    let det_auto_lvl = getSearchParam(searchParams, 'det_auto_lvl')
 
-    var swbranch = getSearchParam(searchParams, 'swbranch')
-    var branch = getSearchParam(searchParams, 'branch')
-    var build = ""
-    if(swbranch) build = "swbranch="+swbranch
-    else if(branch) build = "branch="+branch
-    var URL = uteHostName+"/api/charts/cit_build_progress/?ca__pos_neg="+competenceArea+"&from="+ft.split(',')[0]+"&promotion__pos_neg=\"CIT\"&"+build+"&to="+ft.split(',')[1]
+    let period = getSearchParam(searchParams, 'period')
+    let regression_status = getSearchParam(searchParams, 'regression_status')
+    let test_cycle = getSearchParam(searchParams, 'test_cycle')
+
+    https://rep-portal.wroclaw.nsn-rdnet.net/charts/tep/?period=day&test_cycle=twice%20per%20Feature%20Build%20(2%20weeks%20%2B%20rest)&releases=RAN00&regression_status=rg_CIT,rg_CRT,nf_CIT,nf_CRT&ca=%22RAN_L2_SW_BLR_2%22&det_auto_lvl=-%2299%20-%20Planned%22
+    // https://rep-portal.wroclaw.nsn-rdnet.net/api/charts/tep/?&det_auto_lvl__pos_neg=-%2299+-+Planned%22&period=day&regression_status__name__pos_neg=rg_CIT,rg_CRT,nf_CIT,nf_CRT&releases=RAN00&test_cycle=twice+per+Feature+Build+(2+weeks+%2B+rest)
+    var URL =  `${uteHostName}/api/charts/tep/?ca__pos_neg=${competenceArea}&det_auto_lvl__pos_neg=${det_auto_lvl}&period=${period}&regression_status__name__pos_neg=${regression_status}&releases=${releases}&test_cycle=twice%20per%20Feature%20Build%20(2%20weeks%20%2B%20rest)`
 
     const citJson = await getJsonData(URL);
     var seriesData = [];
-    var series = {noRun:null, envIssue:null, notAnalyzed:null, failed:null, blocked:null}
+    var series = {noRun:null, failed:null, passed:null}
     for(var i in citJson.series){
         switch(citJson.series[i].key){
             case 'No Run':
                 series.noRun = citJson.series[i]
                 break;
-            case 'Environment Issue':
-                series.envIssue = citJson.series[i]
-                break;
-            case 'Not Analyzed':
-                series.notAnalyzed = citJson.series[i]
-                break;
             case 'Failed':
                 series.failed = citJson.series[i]
                 break;
-            case 'Blocked':
-                series.blocked = citJson.series[i]
+            case 'Passed':
+                series.passed = citJson.series[i]
                 break;
         }
     }
     if(series.noRun) seriesData.push(series.noRun)
-    if(series.notAnalyzed) seriesData.push(series.notAnalyzed)
-    if(series.envIssue) seriesData.push(series.envIssue)
     if(series.failed) seriesData.push(series.failed)
-    if(series.blocked) seriesData.push(series.blocked)
+    if(series.passed) seriesData.push(series.passed)
     
-
     citJson.series = seriesData;
 
     var item_hdr_styles = `padding: 5px 8px; font-weight: bold; background-color: #636363 !important; color: #fcfcfc; min-width: 350px; border-top: 1px solid #ccc`
     var items_html = ``;
-    for(var i in citJson.xticks){
-        var build = citJson.xticks[i].split(" ")[0];
-        var date = citJson.xticks[i].split(" ")[1];
-        //     const months = ['Jan','Feb','Mar','Apr','May','June','July','Aug','Sep','Oct','Nov','Dec'];
-        //     var dateSplit = date.split('-')
-        //     var dateFormat = dateSplit[2]+'-'+months[parseInt(dateSplit[1])-1]+'-'+dateSplit[0]
-        // var toBeShown = false;
-        if(build.includes('_')){
 
-            if(citJson.xticks[i].includes(build)){
-                var TC_Count = 0;
-                for(var j in citJson.series){
-                    TC_Count += citJson.series[j].values[i].y
-                }
-            }
 
-            if(TC_Count > 0){
-                items_html += `<div class="item" build='${build}'>
-                                    <div class="item-header" style="${item_hdr_styles}"><span>${build.substr(1)}&emsp;${date}</span><i class="fas fa-chevron-up"></i></div>
-                                    <div class="item-content">
-                                        <div style="text-align: center"><i class="fa fa-spinner fa-spin" style="font-size:24px"></i></div>
-                                    </div>
-                                </div>`
-            }else{
-                items_html += `<div class="item">
-                                    <div class="item-header" style="background-color: rgb(107, 194, 20)"><span>${build.substr(1)}&emsp;${date}</span><span>All Passed</span></div>
-                                </div>`
-            }
 
-        }
+    const last_xtick = citJson.xticks.length - 1;
+
+    var TC_Count = 0;
+    for(var j in citJson.series){
+        TC_Count += citJson.series[j].values[last_xtick].y
     }
 
-    function getCurrentTime() {
-        var date = new Date();
-        var hours = date.getHours();
-        var minutes = date.getMinutes();
-        var ampm = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12 || 12;
-        minutes = minutes < 10 ? '0'+minutes : minutes;
-        return hours + ':' + minutes + ' ' + ampm;
+    if(TC_Count > 0){
+        items_html += `<div class="item">
+                            <div class="item-header" style="${item_hdr_styles}"><span>${citJson.xticks[last_xtick]}&ensp;CRT Status</span><i class="fas fa-chevron-up"></i></div>
+                            <div class="item-content">
+                                <div style="text-align: center"><i class="fa fa-spinner fa-spin" style="font-size:24px"></i></div>
+                            </div>
+                        </div>`
+    }else{
+        items_html += `<div class="item">
+                            <div class="item-header" style="background-color: rgb(107, 194, 20)"><span>${citJson.xticks[last_xtick]}&ensp;CRT Status</span> <span>All Passed</span></div>
+                        </div>`
     }
-    
+
+
+
+
+
     const insertionElm = '.navbar-header'
     if($(insertionElm).find(".ext-wrapper").length == 0){
         $(insertionElm).append(`<div class='ext-wrapper cit-progress'>
                                     <div class='report-stats'>
-                                        <div class='stats-view-btn ext-action-btn'>CIT&nbsp;Progress&ensp;<i class='fas fa-chart-bar'></i></div>
+                                        <div class='stats-view-btn ext-action-btn'>Current CRT ${releases ? releases.substr(0,5)+`${releases.length > 5 ? "..." : ''}` : ''} Status&ensp;<i class='fas fa-chart-bar'></i></div>
                                         <div class="stats-viewer">
                                             <div class="cases-type" style="text-transform:unset; display: block">Last Loaded At <span>${getCurrentTime()}</span></div>
                                             <div class="stats-wrapper" style="width:100%; max-width:500px">
@@ -169,6 +144,10 @@ async function citProgress(searchParams, userSettings){
             // console.log("Team progress click detected")
             event.stopPropagation();
             $(insertionElm+" .ext-wrapper .report-stats .stats-viewer").toggle();
+            if(window.CRT_STATUS_CLICK == false){
+                $(insertionElm+" .ext-wrapper .stats-viewer .item .item-header").click();
+                window.CRT_STATUS_CLICK = true
+            }
         })
         $(insertionElm+" .ext-wrapper .report-stats .stats-viewer").on("click", (event) => {
             event.stopPropagation();
@@ -181,7 +160,7 @@ async function citProgress(searchParams, userSettings){
         });
     }
 
-    $(insertionElm+" .ext-wrapper .stats-viewer .item .item-header").on('click', async function(){
+    $(insertionElm+" .ext-wrapper .stats-viewer .item .item-header").on("click", async function(){
         if(!navigator.onLine){
             alert("Please Check Your Internet Connection!");
         }
@@ -200,32 +179,30 @@ async function citProgress(searchParams, userSettings){
             $(this).parent().children('.item-content').hide('fast');
             return;
         }
-        var build = $(this).parent().attr('build')
+
         var output  = '<div class="item-content_wrapper">';
-        for(var i in citJson.xticks){
-            if(citJson.xticks[i].includes(build)){
-                for(var j in citJson.series){
-                    if(citJson.series[j].values[i].y > 0){
-                        switch(citJson.series[j].key){
-                            case 'No Run':
-                                output += await getGroupHtml(citJson.series[j].values[i].url, "no-run", "No Run", userSettings)
-                                break;
-                            case 'Environment Issue':
-                                output += await getGroupHtml(citJson.series[j].values[i].url, "env-issue", "Environment Issue", userSettings)
-                                break;
-                            case 'Not Analyzed':
-                                output += await getGroupHtml(citJson.series[j].values[i].url, "not-analyzed", "Not Analyzed", userSettings)
-                                break;
-                            case 'Failed':
-                                output += await getGroupHtml(citJson.series[j].values[i].url, "failed", "Failed", userSettings)
-                            // case 'Passed':
-                                break;
-                        }
+
+        const last_xtick = citJson.xticks.length - 1;
+
+        if(citJson.xticks[last_xtick]){
+            for(var j in citJson.series){
+                if(citJson.series[j].values[last_xtick].y > 0){
+                    const lastElement = citJson.series[j].values.length-1;
+                    switch(citJson.series[j].key){
+                        case 'No Run':
+                            output += await get_CRT_GroupHtml(citJson.series[j].values[lastElement].url, "no-run", "No Run", userSettings)
+                            break;
+                        case 'Failed':
+                            output += await get_CRT_GroupHtml(citJson.series[j].values[lastElement].url, "failed", "Failed", userSettings)
+                            break;
+                        case 'Passed':
+                            output += await get_CRT_GroupHtml(citJson.series[j].values[lastElement].url, "passed", "Passed", userSettings)
+                            break;
                     }
                 }
-                break;
             }
         }
+
         output += '</div>'
         $(this).parent().find('.item-content').show()
         $(this).parent().find('.item-content').html(output)

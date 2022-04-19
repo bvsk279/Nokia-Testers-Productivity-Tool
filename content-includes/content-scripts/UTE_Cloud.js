@@ -11,7 +11,7 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
         var popMessageStyles = 'font-size:1em; margin-bottom: -10px; background-color: #1449a3; color: #fcfcfc; top: calc('+navHeight+' + 10px); bottom: unset;';
         //TODO: optimizing the loading using window.loaded array variable and storing the loading statuses in the same
         var rows = parseInt($('.page-size').html()) || 30;
-        setTimeout(function(){ 
+        setTimeout(function(){
             for(var i = 0; i<rows; i++){
                 var endTime = $("tr[data-index='"+i+"'] td.cell-res_end .crop").html();
                 var detectAlarmId = null

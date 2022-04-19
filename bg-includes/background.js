@@ -33,7 +33,13 @@ chrome.runtime.onInstalled.addListener(function() {
           }
       },
       "repPortal":{
-        "isTeamProgressOpen": false
+        "isTeamProgressOpen": false,
+        "cit_chart_page":{
+          "display_categories": ['no-run', 'not-analyzed', 'env-issue', 'failed']
+        },
+        "crt_chart_page":{
+          "display_categories": ['crt_no-run', 'crt_failed']
+        }
       }
   }
   chrome.storage.sync.set({ "nokiaUserSettings": JSON.stringify(newNokiaUserSettings)}, function(){});

@@ -15,9 +15,15 @@
     cursor: pointer;
     line-height: 0.8em;
     user-select: none;
-    font-weight: 500;
+    font-weight: 500 !important;
 
-/* 
+    background: #7F7FD5;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    border: 1px solid #fcfcfc;
+    box-shadow: rgba(238, 238, 238, 0.8) 0px 2px 8px 0px;
+    color: #f8f8f8;
+    /* 
     color: #fcfcfc;
     background: #1488CC;
     background: -webkit-linear-gradient(to right, #2B32B2, #1488CC); 
@@ -242,8 +248,6 @@
     margin-bottom: 10px;
     font-size: 13.5px;
 }
-
-
 
 .stats-viewer{
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;

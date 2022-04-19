@@ -282,6 +282,10 @@ if(window.location.hostname == repPortalHostName){
                 citProgress(window.location.search, userSettings)
             }
 
+            //CRT Charts Page - CRT Progress Featutre
+            if(window.location.pathname == "/charts/tep/"){
+                crtProgress(window.location.search, userSettings)
+            }
         }
     })
 

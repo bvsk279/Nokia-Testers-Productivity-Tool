@@ -95,25 +95,27 @@
                 <!-- Menu Content Starts-->
                 <div class="menu-content">
                     <div class="menu-content-body" id="preferences">
-                        <div class="menu-content-header">Provide your Nokia details for better experince</div>
+                        <div class="menu-content-header">Provide Following details for better experince</div>
                         <div class="actual-content-wrapper">
                             <div class="actual-content">
                                 <div class="form">
                                     <div class="form-element">
-                                        <label for="userName">User Name</label>
+                                        <label for="userName">User Name at Nokia <span style="font-weight:100; color:green">(Recommended)</span></label>
                                         <input type="text" name="userName" id="userName" placeholder="Ex: username" autocomplete="off" style="text-transform: lowercase;">
                                     </div>
-                                    <div class="form-element">
+                                    <!-- <div class="form-element">
                                         <label for="competenceArea">Competence Area </label>
                                         <input type="text" name="competenceArea" id="competenceArea" placeholder="Ex: RAN_L2_SW_BLR_2" autocomplete="off" style="text-transform: uppercase;">
-                                    </div>
+                                    </div> -->
                                 </div>
+                                <br/>
+                                <p class="quote">This username will be highlighted in all the features for better user experiance</p>
                             </div>
                             
                         </div>
                     </div>
 
-                    <div class="menu-content-body" id="cloud-manager" style="display: none">
+                    <div class="menu-content-body sites" id="cloud-manager" style="display: none">
                         <div class="menu-content-header">Cloud Manager</div>
                         <div class="actual-content-wrapper">
                             <div class="actual-content">
@@ -138,15 +140,51 @@
                         </div>
                     </div>
 
-                    <!-- <div class="menu-content-body" id="reporting-portal" style="display: none">
+                    <div class="menu-content-body sites" id="reporting-portal" style="display: none">
                         <div class="menu-content-header">Reporting Portal</div>
                         <div class="actual-content-wrapper">
                             <div class="actual-content">
-                                <p>No setting in particular. May be in future</p>
+                                <p class="sub-title">CIT Chart - Testcase Categories To Display</p>
+                                <div class="form settings_sub-container">
+                                    <div class="form-element">
+                                        <div><div class="color-palette no-run"></div><label>No Run</label></div>
+                                        <div class="toggle"><input type="checkbox" id="no-run" name="no-run" style="display: none"/><label for="no-run" class="tgl">Toggle</label></div>
+                                    </div>
+                                    <div class="form-element">
+                                        <div><div class="color-palette not-analyzed"></div><label>Not Analysed</label></div>
+                                        <div class="toggle"><input type="checkbox" id="not-analyzed" name="not-analyzed" style="display: none"/><label for="not-analyzed" class="tgl">Toggle</label></div>
+                                    </div>
+                                    <div class="form-element">
+                                        <div><div class="color-palette env-issue"></div><label>Env Issue</label></div>
+                                        <div class="toggle"><input type="checkbox" id="env-issue" name="env-issue" style="display: none"/><label for="env-issue" class="tgl">Toggle</label></div>
+                                    </div>
+                                    <div class="form-element">
+                                        <div><div class="color-palette failed"></div><label>Failed</label></div>
+                                        <div class="toggle"><input type="checkbox" id="failed" name="failed" style="display: none"/><label for="failed" class="tgl">Toggle</label></div>
+                                    </div> 
+                                </div>
+
+                                <hr>
+
+                                <p class="sub-title" style="margin-top: 20px">CRT Chart - Testcase Categories To Display</p>
+                                <div class="form settings_sub-container">
+                                    <div class="form-element">
+                                        <div><div class="color-palette no-run"></div><label>No Run</label></div>
+                                        <div class="toggle"><input type="checkbox" id="crt_no-run" name="crt_no-run" style="display: none"/><label for="crt_no-run" class="tgl">Toggle</label></div>
+                                    </div>
+                                    <div class="form-element">
+                                        <div><div class="color-palette failed"></div><label>Failed</label></div>
+                                        <div class="toggle"><input type="checkbox" id="crt_failed" name="crt_failed" style="display: none"/><label for="crt_failed" class="tgl">Toggle</label></div>
+                                    </div>
+                                    <div class="form-element">
+                                        <div><div class="color-palette passed"></div><label>Passed</label></div>
+                                        <div class="toggle"><input type="checkbox" id="crt_passed" name="crt_passed" style="display: none"/><label for="crt_passed" class="tgl">Toggle</label></div>
+                                    </div> 
+                                </div>
                             </div>
                             
                         </div>
-                    </div> -->
+                    </div>
 
                     <div class="menu-content-body" id="tools" style="display: none">
                         <div class="menu-content-header">Supporting Tools</div>
@@ -179,9 +217,9 @@
                         <div class="menu-item" title="Cloud Manager" for="cloud-manager">
                             <img src="icons/cloud-manager.png" width="25px" height="25px">
                         </div>
-                        <!-- <div class="menu-item" title="Reporting Portal" for="reporting-portal">
-                            <img src="icons/reporting-portal.png" width="25px" height="25px">
-                        </div> -->
+                        <div class="menu-item" title="Reporting Portal" for="reporting-portal">
+                            <img src="icons/reporting-portal.png" width="25px" height="23px">
+                        </div>
                         <div class="menu-item" title="Other Tools" for="tools">
                             <i class="fas fa-toolbox"></i>
                         </div>  

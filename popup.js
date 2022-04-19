@@ -53,6 +53,41 @@ $(".form input").on("keypress change", function(){
                     }else settings.uteCloud.warnings = {}
                 }else settings.uteCloud = {"warnings": {}}
                 break;
+            case 'no-run':
+            case 'not-analyzed':
+            case 'env-issue':
+            case 'failed':
+                if(settings.hasOwnProperty('repPortal')){
+                    if(settings.repPortal.hasOwnProperty('cit_chart_page')){
+                        if(inputValue && !settings.repPortal.cit_chart_page.display_categories.includes(inputName)){
+                            settings.repPortal.cit_chart_page.display_categories.push(inputName)
+                        } else{
+                            //removing element from array
+                            var index = settings.repPortal.cit_chart_page.display_categories.indexOf(inputName);
+                            if (index > -1) {
+                                settings.repPortal.cit_chart_page.display_categories.splice(index, 1);
+                            }
+                        }
+                    } else settings.repPortal.cit_chart_page = {}
+                } else settings.repPortal = {"cit_chart_page": {}}
+                break;
+            case 'crt_no-run':
+            case 'crt_failed':
+            case 'crt_passed':
+                if(settings.hasOwnProperty('repPortal')){
+                    if(settings.repPortal.hasOwnProperty('crt_chart_page')){
+                        if(inputValue && !settings.repPortal.crt_chart_page.display_categories.includes(inputName)){
+                            settings.repPortal.crt_chart_page.display_categories.push(inputName)
+                        } else{
+                            //removing element from array
+                            var index = settings.repPortal.crt_chart_page.display_categories.indexOf(inputName);
+                            if (index > -1) {
+                                settings.repPortal.crt_chart_page.display_categories.splice(index, 1);
+                            }
+                        }
+                    } else settings.repPortal.crt_chart_page = {}
+                } else settings.repPortal = {"crt_chart_page": {}}
+                break;
         }
         chrome.storage.sync.set({ "nokiaUserSettings": JSON.stringify(settings) }, function(){});
     });
@@ -80,11 +115,25 @@ $( document ).ready(function() {
             if(settings.hasOwnProperty('uteCloud') && settings.uteCloud.hasOwnProperty('warnings')){
                 
                 const warningInputs = ['tenMinuteWarning', 'thirtyMinuteWarning', 'oneHourWarning'];
-                for(var i in warningInputs){
-                    if(settings.uteCloud.warnings.hasOwnProperty(warningInputs[i])){
-                        $('#'+warningInputs[i]).prop("checked", settings.uteCloud.warnings[warningInputs[i]])
+                warningInputs.forEach((warningInput) => {
+                    if(settings.uteCloud.warnings.hasOwnProperty(warningInput)){
+                        $('#'+warningInput).prop("checked", settings.uteCloud.warnings[warningInput])
                     }
-                }
+                })
+            }
+
+            //CIT TC Categories
+            if(settings.hasOwnProperty('repPortal') && settings.repPortal.hasOwnProperty('cit_chart_page')){
+                settings.repPortal.cit_chart_page.display_categories.forEach((category) => {
+                    $('#'+category).prop("checked", true)
+                })
+            }
+
+            //CRT TC Categories
+            if(settings.hasOwnProperty('repPortal') && settings.repPortal.hasOwnProperty('crt_chart_page')){
+                settings.repPortal.crt_chart_page.display_categories.forEach((category) => {
+                    $('#'+category).prop("checked", true)
+                })
             }
         }
     });

@@ -39,6 +39,7 @@
                 "content-includes/functions.js",
                 "content-includes/content-scripts/UTE_Cloud.js",
                 "content-includes/content-scripts/CIT_Progress.js",
+                "content-includes/content-scripts/CRT_Progress.js",
                 "content-includes/content-scripts/Generate_Robot_File_Path.js",
                 "content-includes/content-scripts/RepPortal.js"
             ]
