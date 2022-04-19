@@ -106,17 +106,28 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                             var targetElm = (dom_nodes.find(elm1).length) ? elm1 : elm2;
                             for(var k = 0; k<dom_nodes.find(targetElm).length; k++){
                                 if(dom_nodes.find(targetElm).eq(k).children(".resource-key-label").html() == "address"){
+                                    //IP address
                                     var ipAddr = dom_nodes.find(targetElm).eq(k).html();
                                     ipAddr = ipAddr.split("</span>: ")[1] || NaN;
+                                    
+                                    //TL Password
+                                    var tl_pwd = "Password-Unavailable"
+                                    dom_nodes.find('table tr td:first-child').each(function(){
+                                        if($(this).html() == "Testline password"){
+                                            tl_pwd = $(this).next().text();
+                                        }
+                                    })
+
                                     $("#table tr[data-index='"+i+"'] td.cell-uuid_or_id").append(' <button class="copy-ip-address" style="margin-left: 10px" title="Copy IP Address"><i class="far fa-copy"></i></button>');
                                     $("#table tr[data-index='"+i+"'] td.cell-uuid_or_id .copy-ip-address").on("click", function(){
-                                        extExecCopy(ipAddr)
-                                        sendMessage("VM IP Address Copied!", "body", popMessageStyles);
+                                        extExecCopy(ipAddr+" || "+tl_pwd)
+                                        sendMessage("VM IP Address & Password Copied!", "body", popMessageStyles);
                                     })
                                     //return;
                                 }
                                 //console.log(k);
                             }
+                            
                             
                         }
 
@@ -357,6 +368,37 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                 })
             }
         }
+
+        // // Appending log links in execution page
+        // if(window.location.pathname.includes("/execution/") && window.location.pathname.includes("/show")){
+        //     $('table.table tbody tr').each(async function(index){
+        //         if($(this).find('td:nth-child(1)').html() == "Logs"){
+        //             let baseUrl = $(this).find('td:nth-child(2)>a').attr('href');
+        //             // baseUrl = baseUrl.replace("http:", "https:")
+        //             // console.log(baseUrl)
+        //             baseUrl = "https://logs.ute.nsn-rdnet.net/cloud/execution/13440098/"
+
+        //             // async function get_web_content_in_dom(URL){
+        //             //     let htmlContent = await getWebContent(URL);
+        //             //     return $($.parseHTML(htmlContent));
+        //             // }
+        //             // var logsPage1_dom = get_web_content_in_dom(baseUrl)
+                    
+        //             let htmlContent = await getWebContent(baseUrl);
+        //             // console.log(htmlContent)
+        //             var logsPage1_dom =  $($.parseHTML(htmlContent));
+
+        //             logsPage1_dom.find('pre>a').each(function(){
+        //                 console.log("Hello, Printing...")
+        //                 if(($(this).attr('href')).includes('execution_')){
+        //                     alert($(this).attr('href'))
+        //                 }
+        //             })
+
+        //             return;
+        //         }
+        //     })
+        // }
     })
 
 }
