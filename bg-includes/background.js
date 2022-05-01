@@ -1,6 +1,5 @@
 console.log("Includes background script is running...");
 
-
 chrome.runtime.onInstalled.addListener(function() {
     chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
       // changeInfo object: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/onUpdated#changeInfo
@@ -95,3 +94,8 @@ chrome.webRequest.onBeforeRequest.addListener(function(details) {
 //     });
 //   }
 // })
+
+
+
+
+// https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest/

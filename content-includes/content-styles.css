@@ -212,6 +212,23 @@
     margin: 0px 2px;
     width: max-content;
 }
+table.stats-table.statistics{
+    border-collapse: collapse;
+}
+table.stats-table.statistics tr td{
+    font-size: 0.9em;
+    /* border: 1px solid rgb(45, 45, 45); */
+    /* font-family: Arial, Helvetica, sans-serif; */
+    font-weight: bold;
+}
+table.stats-table.statistics tr>td:first-child{
+    display: flex;
+    align-items: center;
+}
+table.stats-table.statistics tr>td:last-child{
+    text-align: left !important;
+    margin-left: 15px
+}
 
 .ext-wrapper table.stats-table th, .ext-wrapper table.stats-table td{
     border: 1px solid #ccc;
@@ -355,4 +372,36 @@
     background-color: #fcfcfc;
     border-left: 2px solid #FF9233;
     color: black;
+}
+
+
+
+
+
+.color-palette{
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-right: 0.5rem;
+    background-color: #ccc;
+    border-radius: 2px;
+}
+.no-run{
+    background-color: #ccc;
+    color: #000;
+}
+.not-analyzed{
+    background-color: #FF9233;
+}
+.failed{
+    background-color: red;
+}
+.env-issue{
+    background-color: #9E229C;
+}
+.passed{
+    background-color: rgb(107, 194, 20)
+}
+.cloud{
+    background-color: rgb(77, 255, 255);
 }

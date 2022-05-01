@@ -10,7 +10,11 @@ function getCurrentTime() {
     return hours + ':' + minutes + ' ' + ampm;
 }
 
+var cell_styles = "border: 1px solid #ccc; padding: 3px 5px; line-height: 20px;";
+var table_styles = "width: 350px; border-collapse: collapse; border: 1px solid #ccc;";
+
 async function get_CRT_GroupHtml(url, className, title, userSettings){
+    if(url == null) return '';
     var params = url.split('?')[1]
     var bg_style = "background-color:";
     bg_style += (className == 'no-run') ? "#ccc"
@@ -24,7 +28,6 @@ async function get_CRT_GroupHtml(url, className, title, userSettings){
     var dom_nodes = $($.parseHTML(statsHTML));
     // console.log(dom_nodes.html());
     var count = dom_nodes.find('tr:last-child>td:last-child>b').html();
-    var cell_styles = "border: 1px solid #ccc; padding: 3px 5px; line-height: 20px;";
     dom_nodes.find("tr>td, tr>th").each(function(){
         $(this).attr('style', cell_styles)
     })
@@ -32,7 +35,6 @@ async function get_CRT_GroupHtml(url, className, title, userSettings){
     var groupHTML = ``
     if(statsHTML){
         var grp_title_styles = "font-weight: bold; padding: 2px 10px; width: 100%; padding-top: 5px";
-        var table_styles = "width: 350px; border-collapse: collapse; border: 1px solid #ccc;";
         if(userSettings.repPortal.crt_chart_page.display_categories.includes("crt_"+className)){
             groupHTML += `<div class="group" style="font-size: 0.9em">
                         <div class="group_title ${className}" style="${grp_title_styles};${bg_style}"><span>${title}&ensp;(&nbsp;${count}&nbsp;)</span> &ensp; <a target='_blank' href='${uteHostName}${url}' style='color:inherit; padding: 3px 5px'><i class="fas fa-link"></i></a></div>
@@ -69,13 +71,13 @@ async function crtProgress(searchParams, userSettings){
     let regression_status = getSearchParam(searchParams, 'regression_status')
     let test_cycle = getSearchParam(searchParams, 'test_cycle')
 
-    https://rep-portal.wroclaw.nsn-rdnet.net/charts/tep/?period=day&test_cycle=twice%20per%20Feature%20Build%20(2%20weeks%20%2B%20rest)&releases=RAN00&regression_status=rg_CIT,rg_CRT,nf_CIT,nf_CRT&ca=%22RAN_L2_SW_BLR_2%22&det_auto_lvl=-%2299%20-%20Planned%22
+    // https://rep-portal.wroclaw.nsn-rdnet.net/charts/tep/?period=day&test_cycle=twice%20per%20Feature%20Build%20(2%20weeks%20%2B%20rest)&releases=RAN00&regression_status=rg_CIT,rg_CRT,nf_CIT,nf_CRT&ca=%22RAN_L2_SW_BLR_2%22&det_auto_lvl=-%2299%20-%20Planned%22
     // https://rep-portal.wroclaw.nsn-rdnet.net/api/charts/tep/?&det_auto_lvl__pos_neg=-%2299+-+Planned%22&period=day&regression_status__name__pos_neg=rg_CIT,rg_CRT,nf_CIT,nf_CRT&releases=RAN00&test_cycle=twice+per+Feature+Build+(2+weeks+%2B+rest)
     var URL =  `${uteHostName}/api/charts/tep/?ca__pos_neg=${competenceArea}&det_auto_lvl__pos_neg=${det_auto_lvl}&period=${period}&regression_status__name__pos_neg=${regression_status}&releases=${releases}&test_cycle=twice%20per%20Feature%20Build%20(2%20weeks%20%2B%20rest)`
 
     const citJson = await getJsonData(URL);
     var seriesData = [];
-    var series = {noRun:null, failed:null, passed:null}
+    var series = {noRun:null, failed:null, passed:null, cloudified:null}
     for(var i in citJson.series){
         switch(citJson.series[i].key){
             case 'No Run':
@@ -87,40 +89,55 @@ async function crtProgress(searchParams, userSettings){
             case 'Passed':
                 series.passed = citJson.series[i]
                 break;
+            case 'Cloud Test Ratio':
+                series.cloudified = citJson.series[i]
+                break;
         }
     }
     if(series.noRun) seriesData.push(series.noRun)
     if(series.failed) seriesData.push(series.failed)
     if(series.passed) seriesData.push(series.passed)
+    if(series.cloudified) seriesData.push(series.cloudified)
     
     citJson.series = seriesData;
 
     var item_hdr_styles = `padding: 5px 8px; font-weight: bold; background-color: #636363 !important; color: #fcfcfc; min-width: 350px; border-top: 1px solid #ccc`
     var items_html = ``;
 
-
-
-    const last_xtick = citJson.xticks.length - 1;
-
-    var TC_Count = 0;
-    for(var j in citJson.series){
-        TC_Count += citJson.series[j].values[last_xtick].y
+    // Getting CRT Last FB details
+    const cit_passed_series = citJson.series.filter((category) => category.key.toLowerCase() === "passed")[0]
+    let last_FB_xtick = 0;
+    let lastCount = 1000000;
+    for(let j = cit_passed_series.values.length-1; j>=0; j--){
+        let value = cit_passed_series.values[j]
+        if(value.y > lastCount){
+            last_FB_xtick = value.x;
+            break
+        }
+        lastCount = value.y;
     }
+    const xticks = [citJson.xticks[last_FB_xtick], citJson.xticks[citJson.xticks.length - 1]]
 
-    if(TC_Count > 0){
-        items_html += `<div class="item">
-                            <div class="item-header" style="${item_hdr_styles}"><span>${citJson.xticks[last_xtick]}&ensp;CRT Status</span><i class="fas fa-chevron-up"></i></div>
-                            <div class="item-content">
-                                <div style="text-align: center"><i class="fa fa-spinner fa-spin" style="font-size:24px"></i></div>
-                            </div>
-                        </div>`
-    }else{
-        items_html += `<div class="item">
-                            <div class="item-header" style="background-color: rgb(107, 194, 20)"><span>${citJson.xticks[last_xtick]}&ensp;CRT Status</span> <span>All Passed</span></div>
-                        </div>`
-    }
+    xticks.forEach((date) => {
+        let index = citJson.xticks.indexOf(date);
+        var TC_Count = 0;
+        for(var j in citJson.series){
+            TC_Count += citJson.series[j].values[index].y
+        }
 
-
+        if(TC_Count > 0){
+            items_html += `<div class="item" date="${date}">
+                                <div class="item-header" style="${item_hdr_styles}"><span>${citJson.xticks[index]}&ensp;${xticks.indexOf(date) == 0 ? 'Last&nbsp;FB' : 'Current'}&nbsp;Status</span><i class="fas fa-chevron-up"></i></div>
+                                <div class="item-content">
+                                    <div style="text-align: center"><i class="fa fa-spinner fa-spin" style="font-size:24px"></i></div>
+                                </div>
+                            </div>`
+        }else{
+            items_html += `<div class="item" date="${date}">
+                                <div class="item-header" style="background-color: rgb(107, 194, 20)"><span>${citJson.xticks[index]}&ensp;CRT Status</span> <span>All Passed</span></div>
+                            </div>`
+        }
+    })
 
 
 
@@ -145,7 +162,7 @@ async function crtProgress(searchParams, userSettings){
             event.stopPropagation();
             $(insertionElm+" .ext-wrapper .report-stats .stats-viewer").toggle();
             if(window.CRT_STATUS_CLICK == false){
-                $(insertionElm+" .ext-wrapper .stats-viewer .item .item-header").click();
+                $(insertionElm+" .ext-wrapper .stats-viewer .item:last-child .item-header").click();
                 window.CRT_STATUS_CLICK = true
             }
         })
@@ -180,23 +197,65 @@ async function crtProgress(searchParams, userSettings){
             return;
         }
 
+        var date = $(this).parent().attr('date')
         var output  = '<div class="item-content_wrapper">';
 
-        const last_xtick = citJson.xticks.length - 1;
+        let index = citJson.xticks.indexOf(date);
+        // if(index < citJson.xticks.length-1){
+            let noRunCount, failedCount, passedCount, cloudified;
+            noRunCount = failedCount = passedCount = cloudified = 0;
+            let noRunURL, failedURL, passedURL;
+            noRunURL = failedURL = passedURL = '';
 
-        if(citJson.xticks[last_xtick]){
+            citJson.series.map((item) => {
+                let category = item.key;
+                switch(category.toLowerCase()){
+                    case 'no run':
+                        noRunCount = item.values[index].y;
+                        noRunURL = item.values[index].url;
+                        break;
+                    case 'failed':
+                        failedCount = item.values[index].y;
+                        failedURL = item.values[index].url;
+                        break;
+                    case 'passed':
+                        passedCount = item.values[index].y;
+                        passedURL = item.values[index].url;
+                        break;
+                    case 'cloud test ratio':
+                        cloudified = item.values[index].y;
+                        break;
+                }
+            })
+            output+= `<div class="group" style="font-size: 0.9em">
+                        <table class="stats-table statistics" style="font-size: 1.1em; ${table_styles}">
+                            <!-- <thead> 
+                                <tr>
+                                    <th style="${cell_styles}" colspan='2'>STATS</th>
+                                </tr>
+                            </thead> -->
+                            <tbody>
+                                <tr><td><div class="color-palette no-run"></div><p><a href='${noRunURL}' target='_blank'>No Run TC's</a></p></td><td>${noRunCount}</td></tr>
+                                <tr><td><div class="color-palette failed"></div><p><a href='${failedURL}' target='_blank'>Failed TC's</a></p></td><td>${failedCount}</td></tr>
+                                <tr><td><div class="color-palette passed"></div><p><a href='${passedURL}' target='_blank'>Passed TC's</a></p></td><td>${passedCount}</td></tr>
+                                <tr><td><div class="color-palette cloud"></div><p><b>Cloudified Ratio</b></p></td><td>${cloudified+' %'}</td></tr>
+                            </tbody>
+                        </table>
+                    </div>`
+        // }
+        
+        if(citJson.xticks[index]){
             for(var j in citJson.series){
-                if(citJson.series[j].values[last_xtick].y > 0){
-                    const lastElement = citJson.series[j].values.length-1;
+                if(citJson.series[j].values[index].y > 0){
                     switch(citJson.series[j].key){
                         case 'No Run':
-                            output += await get_CRT_GroupHtml(citJson.series[j].values[lastElement].url, "no-run", "No Run", userSettings)
+                            output += await get_CRT_GroupHtml(citJson.series[j].values[index].url, "no-run", "No Run", userSettings)
                             break;
                         case 'Failed':
-                            output += await get_CRT_GroupHtml(citJson.series[j].values[lastElement].url, "failed", "Failed", userSettings)
+                            output += await get_CRT_GroupHtml(citJson.series[j].values[index].url, "failed", "Failed", userSettings)
                             break;
                         case 'Passed':
-                            output += await get_CRT_GroupHtml(citJson.series[j].values[lastElement].url, "passed", "Passed", userSettings)
+                            output += await get_CRT_GroupHtml(citJson.series[j].values[index].url, "passed", "Passed", userSettings)
                             break;
                     }
                 }
@@ -208,7 +267,8 @@ async function crtProgress(searchParams, userSettings){
         $(this).parent().find('.item-content').html(output)
         $(this).parent().find('.item-content table').css('width', '100%')
 
-        $(this).parent().find('table tbody>tr>td:nth-child(2)').on('click', function(){
+        $(this).parent().find('table.stats-table tbody>tr>td:nth-child(2)').on('click', function(){
+            if($(this).parent().parent().parent().hasClass('statistics')) return false;
             var tester = $(this).html();
             var URL = $(this).parent().parent().attr('url')
             window.open(URL+"&res_tester="+tester, '_blank')

@@ -95,7 +95,7 @@ function getTimeLeft(endDate, warningAudioId, userSettings){
 
 
 async function getWebContent(URL) {
-    console.log("From Function: "+URL)
+    // console.log("From Function: "+URL)
         const response = await fetch(URL, {}).then(res => res).then(data => data) // type: Promise<Response>
         if (!response.ok) {
             //throw Error(response.statusText)

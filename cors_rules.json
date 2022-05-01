@@ -1,0 +1,20 @@
+[
+    {
+      "id": 1,
+      "priority": 1,
+      "action": { "type": "allow" },
+      "condition": {"urlFilter": "cloud.ute.nsn-rdnet.net/", "resourceTypes": ["main_frame"] }
+    },
+    {
+      "id": 2,
+      "priority": 1,
+      "action": { "type": "allow" },
+      "condition": { "urlFilter": "rep-portal.wroclaw.nsn-rdnet.net/", "resourceTypes": ["main_frame"] }
+    },
+    {
+        "id": 3,
+        "priority": 1,
+        "action": { "type": "allow" },
+        "condition": { "urlFilter": "logs.ute.nsn-rdnet.net/", "resourceTypes": ["main_frame"] }
+      } 
+]

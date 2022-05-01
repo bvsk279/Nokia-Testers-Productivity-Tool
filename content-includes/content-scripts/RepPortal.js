@@ -263,7 +263,7 @@ if(window.location.hostname == repPortalHostName){
                     }
                 })
             }else{
-                console.log(chrome.runtime.lastError.message);
+                // console.log(chrome.runtime.lastError.message);
             }
 
             // chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {

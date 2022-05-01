@@ -47,14 +47,21 @@ a{
 .nav-bar .nav-elm>i {
     font-size: 1.2em;
 }
-.nav-bar .nokia-logo>span{
+/* .nav-bar .nokia-logo{
+    display: flex;
+    flex-direction: row;
+}
+.nav-bar .nokia-logo:last-child{
+    margin-left: 15px;
+} */
+.nav-bar .nokia-logo span{
     font-family: 'Rajdhani', sans-serif; 
     font-weight: 700;
     font-size: 1em;
     transform: scale(1.5);
     margin-bottom: -5px;
 }
-.nav-bar .nav-elm.nokia-logo>p{
+.nav-bar .nav-elm.nokia-logo div p{
     font-weight: 400;
 }
 .nav-bar .nav-elm.active{
