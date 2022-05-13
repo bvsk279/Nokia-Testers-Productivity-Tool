@@ -1,7 +1,6 @@
 
 if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
     const uteHostName = "https://cloud.ute.nsn-rdnet.net";
-
     //Current_URL = "https://rep-portal.wroclaw.nsn-rdnet.net/reports/test-runs/?user_stats=flag%253Dtests_to_analyze%2526is_99_planned%253DFalse%2526username%253Dbelvenka"
 
     //API = "https://rep-portal.wroclaw.nsn-rdnet.net/api/automatic-test/runs/report/?fields=no,id,result_color,url,qc_test_instance__m_path,qc_test_set,test_case__qc_instance_number,test_case__name,hyperlink_set__test_logs_url,rain_url,configuration,qc_test_instance__res_tester,end,result,env_issue_type,comment,test_line,test_col__testline_type,builds,qc_test_instance__organization,pronto&limit=25&user_stats=flag%253Dtests_to_analyze%2526is_99_planned%253DFalse%2526username%253Dbelvenka"
@@ -64,6 +63,7 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                     var URL = "https://cloud.ute.nsn-rdnet.net" + URLPath;
 
                     async function onCommit(URL, i, status) {
+                        if(!URL) return false
                         const htmlDOM = await getWebContent(URL);
                         var dom_nodes = $($.parseHTML(htmlDOM));
                         for(var j = 0; j<dom_nodes.find('table tbody tr').length; j++){
@@ -131,6 +131,13 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                             
                         }
 
+                        //5/10 - Testlines reservation progress
+                        // dom_nodes.find('#reservation_progress table.progress-table tbody>tr>td.td_position').each(function(){
+                        //     if($(this).children('div').hasClass('grey')){
+                        //         console.log("Grey bar Detected!")
+                        //     } 
+                        // })
+
                         
                     }
                     if(URLPath != undefined && URLPath != null && URLPath != '') onCommit(URL, i, status);
@@ -161,6 +168,7 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                         case "Execution started":
                         case "Dry run started":
                         case "Dry run pending":
+                        case "New":
                             $(this).addClass('orange-indication');
                             break;
                         default:
@@ -181,12 +189,15 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
             
             $("#table tbody tr td.cell-id").each(function(){
                 if($(this).length > 0 && $(this).find('.ext-elm').length == 0 && $(this).css('visibility') == 'visible'){
+                    // var execStatus = $(this).parent().parent().find('.cell-status .crop').html()
                     let executionLink = uteHostName+$(this).find(".crop a").attr('href');
                     //console.log("Link: "+$(this).find(".crop a").attr('href'));
                     async function commit(thisElm, execURL, execStatus){
+                        if(!execURL) return false
                         const htmlDOM = await getWebContent(execURL);
                         var dom_nodes = $($.parseHTML(htmlDOM));
                         let totalCases = 0, passedCases = 0, failedCases = 0, norun = 0, canceledCased = 0;
+                        let logsUrl = null
                         dom_nodes.find('table .status').each(function(key){
                             totalCases++;
                             if($(this).hasClass("passed")) passedCases++;
@@ -196,21 +207,65 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                         })
 
                         var owner = " <span class='blue-tag ext-elm-tag'>-</span>";
-                        dom_nodes.find('table tr').each(function(){
-                            var tdContent = $(this).find('td').eq(0).html();
-                            if(tdContent != undefined && $(this).find('td').eq(0).html().trim() == "Owner"){
-                                if($(this).find('td').eq(1).html().trim() == "Cloud Regression"){
-                                    owner = " <span class='blue-tag ext-elm-tag owner-cloud-reg' title='Cloud Regression'>CR</span>"
-                                }else owner = " <span class='blue-tag ext-elm-tag owner-manual' title='Manual Execution'>M</span>";
-                                return;
-                            } 
+                        var reportStatus = 'blue'
+                        var reportURL = null
+                        //QC Report Check
+                        dom_nodes.find('table tr').each(async function(){
+                            const fieldName = $(this).find('td').eq(0).html();
+                            const fieldValue = $(this).find('td').eq(1).html();
+                            if(fieldName != undefined && fieldName.includes("Reporting Portal Test Reports")){
+                                if(!fieldValue.includes("Not available")){
+                                    reportStatus = 'green'
+                                    reportURL = $(this).find('td').eq(1).find('a').attr('href')
+                                }
+                                // else{
+                                    // let repPortalUrl = $(this).find('td').eq(1).find('a').attr('href')
+                                    // if(repPortalUrl){
+                                    //     // console.log(`https://rep-portal.wroclaw.nsn-rdnet.net/api/at/reports/report/?fields=no,details_url,file_hash,qc_match,qc_sent&file_hash__in=${getSearchParam(repPortalUrl.split('?')[1], 'zip')}&timestamp_db=30`)
+                                    //     // const Json = await getWebContent(repPortalUrl)
+                                    //     // console.log(Json)
+                                    //     // if(Json.results.length() && Json.results[0].qc_sent){}
+                                    //     if(Json.results.length() && Json.results[0].qc_sent){
+                                    //         owner += " <span class='green-tag ext-elm-tag owner-cloud-reg' title='Reported'>R</span>"
+                                    //     }
+                                    // }else 
+                                // }
+                                return false    
+                            }
                         })
+                        
+                        dom_nodes.find('table tr').each(function(){
+                            const fieldName = $(this).find('td').eq(0).html();
+                            const fieldValue = $(this).find('td').eq(1).html().trim();
+
+                            if(fieldName == 'Logs'){
+                                logsUrl = $(this).find('td').eq(1).find('a').attr('href')
+                            }
+
+                            if(fieldName != undefined && fieldName.includes("Owner")){
+                                if(fieldValue.includes("Cloud Regression")){
+                                    owner = ` <span class='blue-tag ext-elm-tag owner-cloud-reg' title='Cloud Regression${reportURL ? ' - Reported Link' : ' - Not Reported'}'>${reportURL ? `<a href='${reportURL}' target='_blank'>CR</a>` : `CR`}</span>`
+                                }else{
+                                    owner = ` <span class='blue-tag ext-elm-tag owner-cloud-reg' title='Manual Execution${reportURL ? ' - Reported Link' : ' - Not Reported'}'>${reportURL ? `<a href='${reportURL}' target='_blank'>M</a>` : `M`}</span>`
+                                }
+                                return false
+                            }
+                        })
+
+
+                        // const logData = `https://${logsUrl.split('//')[1]}`
+                        // console.log(logData)
+                        // const response = await fetch(logData)
+                        // console.log(await response.text())
+                        // const webContent = fetch(logData)
+                        // .then(response => response.text())
+                        // .then(data => console.log(data));
 
                         var plural = (totalCases > 1) ? "s" : "";
                         var output = ''
                         if(execStatus == "Execution finished" || execStatus == "Execution canceled"){
                             output += owner // Adding Exec Owner
-                            output += " <span class='blue-tag ext-elm-tag'>"+totalCases+" Case"+plural+"</span>"
+                            output += " <span class='blue-tag ext-elm-tag' title='Logs Link'><a href='"+logsUrl+"' target='_blank'>"+totalCases+" Case"+plural+"</a></span>"
                             if(passedCases > 0) output += " <span class='green-tag ext-elm-tag'>"+passedCases+" Passed</span>"
                             if(failedCases > 0) output += " <span class='red-tag ext-elm-tag'>"+failedCases+" Failed</span>"
                             if(canceledCased > 0) output += " <span class='red-tag ext-elm-tag'>"+canceledCased+" Canceled</span>"
@@ -230,29 +285,6 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                         commit($(this), executionLink, execStatus)
                     //}
                 }
-            })
-            $('ul.pagination li, #search_button').on('click', function(){
-                var x = setInterval(function(){
-                    // setTimeout(function(){
-                    //     $('ul.pagination li, #search_button').on('click', function(){
-                    //         var x = setInterval(function(){
-                    //             console.log("interval execution...")
-                    //             if($('.fixed-table-loading').css('display') == 'none'){
-                    //                 setTimeout(function(){
-                    //                     loadExecutionStatus(userSettings)
-                    //                 }, 1000)
-                    //                 clearInterval(x)
-                    //             }
-                    //         }, 1000);
-                    //     })
-                    // },1000)
-                    if($('.fixed-table-loading').css('display') == 'none'){
-                        setTimeout(function(){
-                            loadExecutionStatus(userSettings)
-                        }, 500)
-                        clearInterval(x)
-                    }
-                }, 500);
             })
 
         }, 1000)
@@ -323,7 +355,7 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
 
 
 
-
+            
             //Execution Status
             if(window.location.pathname == "/execution/search/"){
                 $('#table').ready(function(){
@@ -331,6 +363,31 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                         if($('#table tbody tr td.cell-id').find('a').length > 0){
                             setTimeout(function(){
                                 loadExecutionStatus(userSettings)
+
+                                //New: window, old: 'ul.pagination li, #search_button'
+                                $(window).on('click', function(){
+                                    var x = setInterval(function(){
+                                        // setTimeout(function(){
+                                        //     $('ul.pagination li, #search_button').on('click', function(){
+                                        //         var x = setInterval(function(){
+                                        //             console.log("interval execution...")
+                                        //             if($('.fixed-table-loading').css('display') == 'none'){
+                                        //                 setTimeout(function(){
+                                        //                     loadExecutionStatus(userSettings)
+                                        //                 }, 1000)
+                                        //                 clearInterval(x)
+                                        //             }
+                                        //         }, 1000);
+                                        //     })
+                                        // },1000)
+                                        if($('.fixed-table-loading').css('display') == 'none'){
+                                            setTimeout(function(){
+                                                loadExecutionStatus(userSettings)
+                                            }, 500)
+                                            clearInterval(x)
+                                        }
+                                    }, 500);
+                                })
                             }, 500)
                             clearInterval(x)
                         }
@@ -363,8 +420,9 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                         $('#container').append(`<div class="ext-elms-info">
                                                     <span class='blue-tag ext-elm-tag' title='Manual Execution'>M</span> - Manual Single Run
                                                     <span class='blue-tag ext-elm-tag' title='Cloud Regression'>CR</span> - Cloud Regression
+                                                    <span class='blue-tag ext-elm-tag' title='Manual Execution - Reported'><a href='#'>M</a></span> /
+                                                    <span class='blue-tag ext-elm-tag' title='Cloud Regression - Reported' style='margin-left: 0px'><a href='#'>CR</a></span> - Reported Links
                                                 </div>`)
-
                 })
             }
         }

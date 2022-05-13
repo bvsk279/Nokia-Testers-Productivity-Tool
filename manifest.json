@@ -1,9 +1,9 @@
 {
     "author": "Venkata Siva Krishna Bellam",
     "manifest_version": 3,
-    "name": "Nokia's Productavia",
+    "name": "Nokia Testers Productivity Tool",
     "description": "Enhance your productivity working with Reporting Portal & UTE Cloud Manager.",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "icons": {
         "16": "icons/favicon-16.png",
         "24": "icons/favicon-24.png",
@@ -15,20 +15,10 @@
         "default_icon": "icons/favicon-128.png",
         "default_popup": "popup.html"
     },
-    "declarative_net_request": {
-        "rule_resources": [{
-          "id": "ruleset_1",
-          "enabled": true,
-          "path": "cors_rules.json"
-        }]
-      },
-    "devtools_page": "dupe.html",
     "permissions": [
         "tabs",
         "activeTab",
-        "storage",
-        "webRequest",
-        "declarativeNetRequest"
+        "storage"
     ],
     "host_permissions": [
         "*://*.wroclaw.nsn-rdnet.net/*",

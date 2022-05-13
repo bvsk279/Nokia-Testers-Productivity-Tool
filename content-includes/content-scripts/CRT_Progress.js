@@ -12,19 +12,23 @@ function getCurrentTime() {
 
 var cell_styles = "border: 1px solid #ccc; padding: 3px 5px; line-height: 20px;";
 var table_styles = "width: 350px; border-collapse: collapse; border: 1px solid #ccc;";
+var totalTestsURL = null
 
 async function get_CRT_GroupHtml(url, className, title, userSettings){
     if(url == null) return '';
-    var params = url.split('?')[1]
     var bg_style = "background-color:";
     bg_style += (className == 'no-run') ? "#ccc"
                 : (className == 'passed') ? "rgb(107, 194, 20)"
                 : (className == 'failed') ? "red"
-                : "#111"
+                : (className == 'cloud') ? "#48eaea"
+                : "#111";
 
-    let reportApi = uteHostName+'/api/qc-beta/instances/report/?'+'id__in='+getSearchParam(params, 'id')+'&fields=res_tester&limit=1000&extension_request=true';
-    // console.log(reportApi);
-    var statsHTML = await get_TC_Stats(reportApi, userSettings)
+
+    let reportApi = (URL) =>{ 
+        return uteHostName+'/api/qc-beta/instances/report/?'+'id__in='+getSearchParam(URL.split('?')[1], 'id')+'&fields=res_tester&limit=1000&extension_request=true';
+    }
+
+    var statsHTML = await get_TC_Stats(reportApi(url), userSettings)
     var dom_nodes = $($.parseHTML(statsHTML));
     // console.log(dom_nodes.html());
     var count = dom_nodes.find('tr:last-child>td:last-child>b').html();
@@ -32,6 +36,29 @@ async function get_CRT_GroupHtml(url, className, title, userSettings){
         $(this).attr('style', cell_styles)
     })
     dom_nodes.find('tr:last-child').remove();
+
+    //Show TC % that are cloudified - Count & TC % (ex: 60 - 89%) 
+    if(className == 'cloud' && userSettings.repPortal.crt_chart_page.display_categories.includes("crt_"+className) && totalTestsURL){
+        var totalJson = await getTotalTCsJson(reportApi(totalTestsURL))
+        // console.log(totalJson)
+
+        var names = []
+        for(var i in totalJson){
+            var name = totalJson[i].res_tester;
+            if(name) names.push(name)
+        }
+        var map = names.reduce(function(p, c) {p[c] = (p[c] || 0) + 1; return p }, {});
+        // var sortedNames = Object.keys(map).sort(function(a, b) {return map[b] - map[a] });
+        // console.log(sortedNames)
+        for(var i = 0; i<dom_nodes.find('tr').length; i++){
+            var tester = dom_nodes.find('tr').eq(i).find('td.tester-name').html()
+            var cloudCount = dom_nodes.find('tr').eq(i).find('td:last-child').html()
+            var totalCount = parseInt(map[tester])
+            var cloudifiedPercent = ((cloudCount / totalCount)*100).toFixed(0)
+            dom_nodes.find('tr').eq(i).find('td').eq(1).html(`<span title='Clouded Cases'>${cloudCount}</span>/<span title='Total Cases'>${totalCount}</span> <span style="font-size: 0.9em" title='Cloudified Percentage'>&nbsp;(${cloudifiedPercent}<span style="font-size: 0.8em">%</span>)</span>`)
+        }
+    }
+
     var groupHTML = ``
     if(statsHTML){
         var grp_title_styles = "font-weight: bold; padding: 2px 10px; width: 100%; padding-top: 5px";
@@ -77,7 +104,7 @@ async function crtProgress(searchParams, userSettings){
 
     const citJson = await getJsonData(URL);
     var seriesData = [];
-    var series = {noRun:null, failed:null, passed:null, cloudified:null}
+    var series = {noRun:null, failed:null, passed:null, cloud:null, total:null, cloudified:null}
     for(var i in citJson.series){
         switch(citJson.series[i].key){
             case 'No Run':
@@ -89,6 +116,12 @@ async function crtProgress(searchParams, userSettings){
             case 'Passed':
                 series.passed = citJson.series[i]
                 break;
+            case 'Cloud':
+                series.cloud = citJson.series[i]
+                break;
+            case 'Total':
+                series.total = citJson.series[i]
+                break;
             case 'Cloud Test Ratio':
                 series.cloudified = citJson.series[i]
                 break;
@@ -97,6 +130,8 @@ async function crtProgress(searchParams, userSettings){
     if(series.noRun) seriesData.push(series.noRun)
     if(series.failed) seriesData.push(series.failed)
     if(series.passed) seriesData.push(series.passed)
+    if(series.cloud) seriesData.push(series.cloud)
+    if(series.total) seriesData.push(series.total)
     if(series.cloudified) seriesData.push(series.cloudified)
     
     citJson.series = seriesData;
@@ -202,25 +237,32 @@ async function crtProgress(searchParams, userSettings){
 
         let index = citJson.xticks.indexOf(date);
         // if(index < citJson.xticks.length-1){
-            let noRunCount, failedCount, passedCount, cloudified;
-            noRunCount = failedCount = passedCount = cloudified = 0;
-            let noRunURL, failedURL, passedURL;
-            noRunURL = failedURL = passedURL = '';
+            let count = {noRun: 0, failed: 0, passed: 0, cloud: 0, total: 0, cloudified: 0 }
+            let URL = {noRun: '', failed: '', passed: '', cloud: ''}
 
             citJson.series.map((item) => {
                 let category = item.key;
                 switch(category.toLowerCase()){
                     case 'no run':
-                        noRunCount = item.values[index].y;
-                        noRunURL = item.values[index].url;
+                        count.noRun = item.values[index].y;
+                        URL.noRun = item.values[index].url;
                         break;
                     case 'failed':
-                        failedCount = item.values[index].y;
-                        failedURL = item.values[index].url;
+                        count.failed = item.values[index].y;
+                        URL.failed = item.values[index].url;
                         break;
                     case 'passed':
-                        passedCount = item.values[index].y;
-                        passedURL = item.values[index].url;
+                        count.passed = item.values[index].y;
+                        URL.passed = item.values[index].url;
+                        break;
+                    case 'cloud':
+                        count.cloud = item.values[index].y;
+                        URL.cloud = item.values[index].url;
+                        break;
+                    case 'total':
+                        count.total = item.values[index].y;
+                        URL.total = item.values[index].url;
+                        totalTestsURL = URL.total
                         break;
                     case 'cloud test ratio':
                         cloudified = item.values[index].y;
@@ -235,10 +277,12 @@ async function crtProgress(searchParams, userSettings){
                                 </tr>
                             </thead> -->
                             <tbody>
-                                <tr><td><div class="color-palette no-run"></div><p><a href='${noRunURL}' target='_blank'>No Run TC's</a></p></td><td>${noRunCount}</td></tr>
-                                <tr><td><div class="color-palette failed"></div><p><a href='${failedURL}' target='_blank'>Failed TC's</a></p></td><td>${failedCount}</td></tr>
-                                <tr><td><div class="color-palette passed"></div><p><a href='${passedURL}' target='_blank'>Passed TC's</a></p></td><td>${passedCount}</td></tr>
-                                <tr><td><div class="color-palette cloud"></div><p><b>Cloudified Ratio</b></p></td><td>${cloudified+' %'}</td></tr>
+                                <tr><td><div class="color-palette no-run"></div><p><a href='${URL.noRun}' target='_blank'>No Run TC's</a></p></td><td>${count.noRun}</td></tr>
+                                <tr><td><div class="color-palette failed"></div><p><a href='${URL.failed}' target='_blank'>Failed TC's</a></p></td><td>${count.failed}</td></tr>
+                                <tr><td><div class="color-palette passed"></div><p><a href='${URL.passed}' target='_blank'>Passed TC's</a></p></td><td>${count.passed}</td></tr>
+                                <tr><td><div class="color-palette cloud"></div><p><a href='${URL.cloud}' target='_blank'>Cloud TC's</a></p></td><td>${count.cloud}</td></tr>
+                                <tr><td><div class="color-palette total"></div><p><a href='${URL.total}' target='_blank'>Total TC's</a></p></td><td>${count.total}</td></tr>
+                                <tr><td><p><b>Cloudified Ratio</b></p></td><td>${cloudified+' %'}</td></tr>
                             </tbody>
                         </table>
                     </div>`
@@ -257,6 +301,9 @@ async function crtProgress(searchParams, userSettings){
                         case 'Passed':
                             output += await get_CRT_GroupHtml(citJson.series[j].values[index].url, "passed", "Passed", userSettings)
                             break;
+                        case 'Cloud':
+                            output += await get_CRT_GroupHtml(citJson.series[j].values[index].url, "cloud", "Cloud", userSettings)
+                            break;
                     }
                 }
             }
@@ -274,5 +321,4 @@ async function crtProgress(searchParams, userSettings){
             window.open(URL+"&res_tester="+tester, '_blank')
         })
     })
-
 }

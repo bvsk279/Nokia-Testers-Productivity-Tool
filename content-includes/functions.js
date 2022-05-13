@@ -95,25 +95,45 @@ function getTimeLeft(endDate, warningAudioId, userSettings){
 
 
 async function getWebContent(URL) {
-    // console.log("From Function: "+URL)
+    try{
         const response = await fetch(URL, {}).then(res => res).then(data => data) // type: Promise<Response>
         if (!response.ok) {
             //throw Error(response.statusText)
             //console.log("failed to load!");
         }
         return response.text()
+    }catch(e){
+        // console.log(e)
+    }
 }
 
 
 async function getJsonData(API_URL) {
-    const response = await fetch(API_URL, {}).then(res => res).then(data => data) // type: Promise<Response>
-    if (!response.ok) {
-      //throw Error(response.statusText)
-      //console.log("failed to load!");
+    try{
+        const response = await fetch(API_URL, {}).then(res => res).then(data => data) // type: Promise<Response>
+        if (!response.ok) {
+        //throw Error(response.statusText)
+        //console.log("failed to load!");
+        }
+        return await response.json()
+    }catch(e){
+        // console.log(e)
     }
-    return response.json()
 }
 
+async function getTotalTCsJson(API_URL) {
+    let results = []
+    let response = null
+    let nextURL = API_URL
+    for(var i = 0; i<5; i++){
+        if(nextURL){
+            response = await getJsonData(nextURL)
+            nextURL = (response.next) ? response.next : null
+            results.push(...response.results)
+        }else break
+    }
+    return results
+}
 
 const getHeaderCell= (width) => {
   return `<div col="col" ui-grid-header-cell="" class="ui-grid-header-cell ext-elm-header-cell" style="max-width: ${width}px; min-width: ${width}px;">

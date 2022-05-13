@@ -74,6 +74,7 @@ $(".form input").on("keypress change", function(){
             case 'crt_no-run':
             case 'crt_failed':
             case 'crt_passed':
+            case 'crt_cloud':
                 if(settings.hasOwnProperty('repPortal')){
                     if(settings.repPortal.hasOwnProperty('crt_chart_page')){
                         if(inputValue && !settings.repPortal.crt_chart_page.display_categories.includes(inputName)){

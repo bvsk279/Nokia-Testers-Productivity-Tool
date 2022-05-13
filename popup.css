@@ -272,6 +272,9 @@ input:checked+.tgl:after{
 .passed{
     background-color: rgb(107, 194, 20)
 }
+.cloud{
+    background-color: #4dffff;
+}
 
 
 /* ---Profile Styles---- */

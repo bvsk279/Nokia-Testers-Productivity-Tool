@@ -1,4 +1,4 @@
-console.log("Includes background script is running...");
+console.log("Background script is running...");
 
 chrome.runtime.onInstalled.addListener(function() {
     chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
@@ -37,7 +37,7 @@ chrome.runtime.onInstalled.addListener(function() {
           "display_categories": ['no-run', 'not-analyzed', 'env-issue', 'failed']
         },
         "crt_chart_page":{
-          "display_categories": ['crt_no-run', 'crt_failed']
+          "display_categories": ['crt_no-run', 'crt_failed', 'crt_cloud']
         }
       }
   }
