@@ -1,3 +1,3 @@
-# Nokia-Testers-EX
+# Nokia-Testers-Productivity-Tool
 
-Non Nokia Project - Browser Extention tool for Nokia Testers made to enhance the experiances of the internal employees of nokia interacting with nokian tools on web
+A Browser Extention tool developed for Nokia Testers to enhance the user experiances & productivity of the employees at nokia interacting with web tools namely Cloud Manager and Reporting Portal
