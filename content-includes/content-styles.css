@@ -355,16 +355,20 @@ table.stats-table.statistics tr>td:last-child{
 .robot-file-copy-btn{
     position: absolute;
     padding: 1px 5px;
-    background-color: #00000017;
+    /* background-color: #0000009e;
+    color: #0000009c; */
     cursor: pointer;
     user-select: none;
     border-radius: 2px;
-    right:0px;
+    right:20px;
     bottom:0px;
-    color: #0000009c;
+    z-index: 2;
+    color: #eadddd;
+    background-color: #00000091;
 }
 .robot-file-copy-btn:hover{
-    background-color: #00000025;
+    /* background-color: #00000025; */
+    background-color: #363636;
 }
 
 .ext-message-box{

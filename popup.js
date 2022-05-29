@@ -1,3 +1,24 @@
+function getDateFormat(timestamp){
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    var date = new Date(timestamp)
+    var suffix = date.getHours() >= 12 ? "pm":"am";
+    var hours = ((date.getHours() + 11) % 12 + 1)
+    var minutes = date.getMinutes()
+    var mins = (minutes < 10) ? `0${minutes}` : minutes
+    return date.getDate() + " "+ months[date.getMonth()] + ", " + hours + ":"+ mins + " "+suffix;
+}
+
+function subDates(datetime){
+    var dateFuture = Date.parse(datetime);
+    var dateNow = new Date();
+    var timeleft = dateNow.getTime() - dateFuture;
+    // if(timeleft<=0) return "completed";
+    var days = Math.floor(timeleft / (1000 * 60 * 60 * 24));
+    // var hrs = Math.floor((timeleft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    return parseInt(days)
+    // return days+":"+hrs+":"+mins+":"+secs;
+}
+
 window.reportSending = false;
 
 $('.popup-body .nav-elm').on('click', function(){
@@ -28,6 +49,81 @@ $('#dev-info .menu-list-container .menu-item').on("click", function(){
 })
 
 
+$('#view_tl_ext_logs').on("click", function() {
+    $('#settings .menu-content .menu-content-body').hide();
+    $('#tl-ext-logs').show()
+    let output = ""
+    chrome.storage.local.get(["ntptTlResData"], function(data){
+        if(data.hasOwnProperty('ntptTlResData')){
+            const logs = JSON.parse(data.ntptTlResData)
+            if(logs.logs){
+                logs.logs.forEach(log => {
+                    output += `<div class="log-item-container">`
+                     output += `
+                        <div class="log-head">
+                            <div class="row1">
+                                <div title='${(log.topology.length > 15) ? log.topology : ''}'>${log.topology.slice(0, 14)}${(log.topology.length > 15) ? `...` : ``}</div>
+                                <div>${log.tl_name}</div>
+                            </div>
+                            <div class="row2">
+                                <div>Res Start: <span>${log.booked_time}</span></div>
+                                <div title='Delete this log'>${subDates(log.booked_time) > 0 ? `<i class="fa fa-trash log-delete-btn" aria-hidden="true" id='delete-log-${log.res_id}'></i>` : ''}</div>
+                            </div>
+                        </div>
+                        <table>
+                            <tr>
+                                <th title='Times of Extension' class='slant-text'>&ensp;&ensp;</th>
+                                <th title='Extension duration'>Ext dur</th>
+                                <th title='Time of Automatic Extension'>Time of ext</th>
+                                <th>Ext status</th>
+                            </tr>`
+                    log.instances.forEach((instance, index) => {
+                        const status = instance.status.includes('success') ? `<span class='green-clr' title='${instance.status}'>Success</span>` 
+                            : `<span class='red-clr' title='${instance.status}'>Failed</span>` 
+                        output += `
+                            <tr>
+                                <td>&ensp;${index+1}&ensp;</td>
+                                <td>${instance.ext_dur}</td>
+                                <td>${getDateFormat(parseInt(instance.time))}</td>
+                                <td>${status}</td>
+                            </tr>
+                        `
+                    })
+                    output += `
+                    </table>
+                    </div>`
+                })
+            }else output = "<div style='text-align:center'>No logs yet.</div>"
+        }else{
+            output = "<div style='text-align:center'>No logs yet.</div>"
+        }
+        setTimeout(() => {
+            $('#tl-ext-logs .logs-list').html(output)
+        }, 300)
+        
+
+        $('.log-delete-btn').on('click', function(logs){
+            if(confirm("Do you really want to delete this log?")){
+                var res_id = $(this).attr('id').replace('delete-log-', '')
+                console.log(res_id)
+                chrome.storage.local.get(["ntptTlResData"], function(data){
+                    if(data.hasOwnProperty('ntptTlResData')){
+                        var logs = JSON.parse(data.ntptTlResData).logs
+                        var newLogs = logs.filter(log => log.res_id !== res_id)
+                        console.log(newLogs)
+                        chrome.storage.local.set({ "ntptTlResData": JSON.stringify({"logs":newLogs})}, function(){});
+                        $('#view_tl_ext_logs').click()
+                    }
+                })
+            }
+        })
+    })
+})
+
+$('#tl-logs-refresh-btn').on('click', function(){
+    $('#view_tl_ext_logs').click()
+})
+
 
 $(".form input").on("keypress change", function(){
     var inputName = $(this).attr("name")
@@ -42,6 +138,14 @@ $(".form input").on("keypress change", function(){
                     settings.userData[inputName] = inputValue
                 }else{
                     settings.userData = {}
+                }
+                break;
+            case 'autoExtendTestlineRes':
+                if(settings.hasOwnProperty('uteCloud')){
+                    console.log("Triggering...")
+                    settings.uteCloud[inputName] = inputValue
+                }else{
+                    settings.uteCloud = {}
                 }
                 break;
             case 'tenMinuteWarning':
@@ -100,7 +204,7 @@ $(".form input").on("keypress change", function(){
 //Loading the data to popup page
 $( document ).ready(function() {
     chrome.storage.sync.get(["nokiaUserSettings"], function(data){
-        if(data.nokiaUserSettings){
+        if(data.hasOwnProperty('nokiaUserSettings')){
             const settings = JSON.parse(data.nokiaUserSettings);
             
             //Settings User data
@@ -109,6 +213,13 @@ $( document ).ready(function() {
                 for(var i in inputIds){
                     if(settings.userData.hasOwnProperty(inputIds[i]))
                         $('#'+inputIds[i]).val(settings.userData[inputIds[i]])
+                }
+            }
+
+            //Settings Automatic TL Extender
+            if(settings.hasOwnProperty('uteCloud') && settings.uteCloud.hasOwnProperty('autoExtendTestlineRes')){
+                if(settings.uteCloud.hasOwnProperty('autoExtendTestlineRes')){
+                    $('#autoExtendTestlineRes').prop("checked", settings.uteCloud.autoExtendTestlineRes)
                 }
             }
 

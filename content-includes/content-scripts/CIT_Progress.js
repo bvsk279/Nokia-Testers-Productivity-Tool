@@ -3,15 +3,6 @@
 //CIT Individual report: https://rep-portal.wroclaw.nsn-rdnet.net/api/qc-beta/instances/report/?build=SBTS00_ENB_9999_211213_000005&cit_id=:hash:55d5f8933c916e93ea03f743159ea204&fields=res_tester&limit=1000
 const uteHostName = "https://rep-portal.wroclaw.nsn-rdnet.net";
 
-// async function buildItemHtml(url){
-//     var params = url.split('?')
-
-//     let reportApi = uteHostName+'/api/qc-beta/instances/report/?build='+getSearchParam(params, 'build')+'&cit_id='+getSearchParam(params, 'cit_id')+'&fields=res_tester&limit=1000';
-//     let data = await getJsonData(reportApi);
-//     return 
-
-// }
-
 async function getGroupHtml(url, className, title, userSettings){
     var params = url.split('?')[1]
     var bg_style = "background-color:";
@@ -110,12 +101,7 @@ async function citProgress(searchParams, userSettings){
     for(var i in citJson.xticks){
         var build = citJson.xticks[i].split(" ")[0];
         var date = citJson.xticks[i].split(" ")[1];
-        //     const months = ['Jan','Feb','Mar','Apr','May','June','July','Aug','Sep','Oct','Nov','Dec'];
-        //     var dateSplit = date.split('-')
-        //     var dateFormat = dateSplit[2]+'-'+months[parseInt(dateSplit[1])-1]+'-'+dateSplit[0]
-        // var toBeShown = false;
         if(build.includes('_')){
-
             if(citJson.xticks[i].includes(build)){
                 var TC_Count = 0;
                 for(var j in citJson.series){
