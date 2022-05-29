@@ -1,19 +1,8 @@
-console.log("Background script is running...");
+// console.log("Background script is running...");
 
 chrome.runtime.onInstalled.addListener(function() {
-    chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-      // changeInfo object: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/onUpdated#changeInfo
-      // status is more reliable (in my case)
-      // console.log(JSON.stringify(changeInfo)) //" to check what's available and works in your case
-      if (changeInfo.status === 'complete') {
-        chrome.tabs.sendMessage(tabId, {
-          message: 'TabUpdated'
-        });
-      }
-    })
-    
     //Setting the local data
-    var newNokiaUserSettings = {
+    const newNokiaUserSettings = {
       "userData":{
           "userName": "",
           "competenceArea": ""
@@ -29,7 +18,8 @@ chrome.runtime.onInstalled.addListener(function() {
               "tenMinuteWarning" : true,
               "thirtyMinuteWarning": true,
               "oneHourWarning": true
-          }
+          },
+          "autoExtendTestlineRes": true
       },
       "repPortal":{
         "isTeamProgressOpen": false,
@@ -41,7 +31,23 @@ chrome.runtime.onInstalled.addListener(function() {
         }
       }
   }
-  chrome.storage.sync.set({ "nokiaUserSettings": JSON.stringify(newNokiaUserSettings)}, function(){});
+  chrome.storage.sync.get(["nokiaUserSettings"], function(data){
+    if(!data.hasOwnProperty('nokiaUserSettings')){
+      //If nokiaUserSettings are not there in client storage
+      //Remember, If you want to update the user settings json, Call this below code after this if else
+      chrome.storage.sync.set({ "nokiaUserSettings": JSON.stringify(newNokiaUserSettings)}, function(){});
+    }else{
+      let tempSaveSettings = JSON.parse(data.nokiaUserSettings);
+      chrome.storage.sync.set({ "nokiaUserSettings": JSON.stringify(
+        { ...tempSaveSettings,
+          "uteCloud": {
+            ...tempSaveSettings.uteCloud,
+            "autoExtendTestlineRes": true
+          }
+        }
+      )}, function(){});
+    }
+  });
 });
 
 
@@ -64,37 +70,6 @@ chrome.webRequest.onBeforeRequest.addListener(function(details) {
 {urls: ["*://rep-portal.wroclaw.nsn-rdnet.net/*"]},
 ["requestBody"]
 );
-
-
-// window.Tabs = []
-// chrome.webRequest.onBeforeRequest.addListener(function(details) { 
-//   if(details.url.includes('/api/') && details.url.includes('/report') && details.url.includes('fields=') && !details.url.includes('extension_request=true')){
-//     console.log(details.url);
-//     chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
-//       window.Tabs.push({id: tabs[0].id, lastRequestURL: details.url})
-//     });
-//   }
-// },
-// {urls: ["*://rep-portal.wroclaw.nsn-rdnet.net/*"]},
-// ["requestBody"]
-// );
-
-// chrome.runtime.onConnect.addListener(function(port) {
-//   console.log("Port Detected");
-//   if(port.name === 'apiWebRequest') {
-//     port.onMessage.addListener(function(msg) {
-//       if (msg.request == "Get Last API Request")
-//       console.log("Tabs: "+window.Tabs)
-//       for(var i in window.Tabs){
-//         console.log(window.Tabs[i])
-//         if(window.Tabs[i].id == msg.tabId){
-//           port.postMessage({url: window.Tabs[i].lastRequestURL});
-//         }
-//       }
-//     });
-//   }
-// })
-
 
 
 

@@ -3,7 +3,7 @@
     "manifest_version": 3,
     "name": "Nokia Testers Productivity Tool",
     "description": "Enhance your productivity working with Reporting Portal & UTE Cloud Manager.",
-    "version": "0.2.1",
+    "version": "2.2.0",
     "icons": {
         "16": "icons/favicon-16.png",
         "24": "icons/favicon-24.png",
@@ -17,8 +17,9 @@
     },
     "permissions": [
         "tabs",
-        "activeTab",
-        "storage"
+        "storage",
+        "unlimitedStorage",
+        "webRequest"
     ],
     "host_permissions": [
         "*://*.wroclaw.nsn-rdnet.net/*",

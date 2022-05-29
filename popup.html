@@ -22,8 +22,8 @@
             <div class="navbar-content" id="dev-info" style="display: none">
                 <!-- Menu-Content Starts-->
                 <div class="menu-content">
-                    <div class="menu-content-body" id="contact-dev">
-                        <div class="menu-content-header">Connect with Developer</div>
+                    <div class="menu-content-body" id="contact-inv">
+                        <div class="menu-content-header">Inventor</div>
                         <div class="actual-content-wrapper">
                             <div class="actual-content">
                                 <div class="profile">
@@ -39,11 +39,33 @@
                                 <div class="contact-detail-container">
                                     <div class="contact-detail">
                                         <span><i class="fas fa-envelope"></i></span>
-                                        <span>bellam.venkata_siva_krishna@nokia.com</span>
+                                        <span>b.v.sivakrishna279@gmail.com</span>
                                     </div>
                                     <div class="contact-detail">
                                         <span><a target="_blank" href="https://www.linkedin.com/in/bvsivakrishna/"><i class="fab fa-linkedin-in"></i></a></span>
                                         <span><a target="_blank" href="https://www.linkedin.com/in/bvsivakrishna/">/in/bvsivakrishna</a></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="menu-content-body" id="contact-dev" style="display: none">
+                        <div class="menu-content-header">Connect with New Developers</div>
+                        <div class="actual-content-wrapper">
+                            <div class="actual-content">
+                                <div class="contact-detail-container">
+                                    <div class="contact-detail">
+                                        <span><i class="fas fa-envelope"></i></span>
+                                        <span>Musthafa, Shahnara (IN/Bangalore)</span>
+                                    </div>
+                                    <div class="contact-detail">
+                                        <span><i class="fas fa-envelope"></i></span>
+                                        <span><!--Kindly add the Co-dev, In future-->Comming up...</span>
+                                    </div>
+                                    <div class="contact-detail">
+                                        <span><i class="fas fa-envelope"></i></span>
+                                        <span><!--Kindly add the Co-dev, In future-->Comming up...</span>
                                     </div>
                                 </div>
                             </div>
@@ -68,7 +90,7 @@
                                         <textarea type="text" name="bug-detail" id="bug-detail" autocomplete="off" placeholder="Mention your message as detailed as possible please"></textarea>
                                     </div>
                                     <div class="form-element">
-                                        <button class="action-btn" id="report-bug-submit-btn">Report&ensp;/&ensp;Applause</button>
+                                        <button class="action-btn" id="report-bug-submit-btn"><!-- Report&ensp;/&ensp;Applause-->Sorry, This wasn't working!</button>
                                     </div>
                                 </div>
                             </div>
@@ -79,9 +101,13 @@
 
                 <!-- Menu List Starts-->
                 <div class="menu-list-container dev-info-menu">
-                    <div class="menu-item active" for="contact-dev">
+                    <div class="menu-item active" for="contact-inv">
                         <i class="fas fa-user-circle"></i>
-                        <p>Developer</p>
+                        <p>Inventor</p>
+                    </div>
+                    <div class="menu-item" for="contact-dev">
+                        <i class="fas fa-user-circle"></i>
+                        <p>Developers</p>
                     </div>
                     <div class="menu-item" for="report-bug">
                         <i class="fas fa-bug"></i>
@@ -94,6 +120,20 @@
             <div class="navbar-content" id="settings">
                 <!-- Menu Content Starts-->
                 <div class="menu-content">
+
+                    <div class="menu-content-body" id="tl-ext-logs" style="display: none">
+                        <div class="menu-content-header" style="display: flex; align-items: center; justify-content: space-between;">Automatic Testline Extension Logs <button id="tl-logs-refresh-btn">Refresh</button></div>
+                        <div class="actual-content-wrapper">
+                            <div class="actual-content logs-content">
+                                <div class="logs-list">
+                                    <!-- <div>No Logs are loaded! <span style="font-size: 0.9em">- Please, Contact Developer</span></div> -->
+                                    <div>Loading...</div>
+                                </div>
+                                <!-- <p class="quote">This username will be highlighted in all the features for better user experiance</p> -->
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="menu-content-body" id="preferences">
                         <div class="menu-content-header">Provide Following details for better experince</div>
                         <div class="actual-content-wrapper">
@@ -119,7 +159,16 @@
                         <div class="menu-content-header">Cloud Manager</div>
                         <div class="actual-content-wrapper">
                             <div class="actual-content">
-                                <p style="margin-bottom: 10px">Testline Reservation Finish Warnings</p><!--Warn me Before My Testline Finishes-->
+                                <div class="form" style="display: flex; justify-content: space-between; align-items: center">
+                                    <p style="margin-bottom: 5px; font-weight: 600">Extend TL Reservations Automatically </p>
+                                    <div class="toggle"><input type="checkbox" id="autoExtendTestlineRes" name="autoExtendTestlineRes" style="display: none"/><label for="autoExtendTestlineRes" class="tgl">Toggle</label></div>
+                                </div>
+                                <p class="quote" style="margin-bottom: 10px;">Kindly have only one active tab of <a href="https://cloud.ute.nsn-rdnet.net/user/reservations">UTE Cloud Manager Reservations</a>. To avoid redundancy of multiple automatic TL extensions</p>
+                                <div style="margin-bottom: 20px">
+                                    <button id="view_tl_ext_logs">TL Extension Logs</button>
+                                </div>
+                               
+                                <p style="margin-bottom: 10px; font-weight: 600">Testline Reservation Finish Warnings</p><!--Warn me Before My Testline Finishes-->
                                 <div class="form">
                                     <div class="form-element">
                                         <label>Before 1 Hour</label>
@@ -134,7 +183,7 @@
                                         <div class="toggle"><input type="checkbox" id="tenMinuteWarning" name="tenMinuteWarning" style="display: none"/><label for="tenMinuteWarning" class="tgl">Toggle</label></div>
                                     </div>
                                 </div>
-                                <p class='quote'>Warnings are triggered when you have the following URL already opened in your web browser <br/> <a target="_blank" href="https://cloud.ute.nsn-rdnet.net/user/reservations">cloud.ute.nsn-rdnet.net/user/reservations</a></p>
+                                <p class='quote'>Warnings are triggered when you have active browser tab of the following URL with atleast one user interaction <br/><a target="_blank" href="https://cloud.ute.nsn-rdnet.net/user/reservations">cloud.ute.nsn-rdnet.net/user/reservations</a></p>
                             </div>
                             
                         </div>
@@ -194,9 +243,9 @@
                         <div class="menu-content-header">Supporting Tools</div>
                         <div class="actual-content-wrapper">
                             <div class="actual-content">
-                                <p style="margin-bottom: 10px"><b>Script to Automatically Open UTE Testline</b></p><!--Warn me Before My Testline Finishes-->
+                                <p style="margin-bottom: 10px"><b>Automatically Open UTE Testline Reservations</b></p><!--Warn me Before My Testline Finishes-->
                                 <div>
-                                    <p><a href="https://nokia.sharepoint.com/:p:/s/LTE_BLR_ET/EaXwCapWd0VBmJAtV7ZR25kBmqhf4c6l97FEotXFLqC9qQ" target="_blank" style="color: blue">Documentation Link for How to Install and Use</a></p>
+                                    <p><a href="https://nokia.sharepoint.com/:p:/s/LTE_BLR_ET/EaXwCapWd0VBmJAtV7ZR25kBmqhf4c6l97FEotXFLqC9qQ" target="_blank" style="color: blue">Link to How to Install and Use this.</a></p>
                                 </div>
                                 <br/>
                                 <div style="margin-bottom: 5px">
@@ -227,7 +276,7 @@
                         <div class="menu-item" title="Other Tools" for="tools">
                             <i class="fas fa-toolbox"></i>
                         </div>  
-                        <a class="menu-item" style="text-decoration: none; color:#fcfcfc; font-size: 1.1em;" target="_blank" title="How to USE ME?" id="tool-usage-link" href="https://www.zopamo.com/nokia/nokia-testers-tool-usage-doc"><i class="fas fa-question-circle"></i></a>
+                        <a class="menu-item" style="text-decoration: none; color:#fcfcfc; font-size: 1.1em;" target="_blank" title="How to USE ME?" id="tool-usage-link" href="https://nokia.sharepoint.com/:p:/s/LTE_BLR_ET/EXcg6cdoKOlCiycMhlX_eMcBcv-6nClRhM_wG4oDI_o4AQ?e=anf3RL&isSPOFile=1"><i class="fas fa-question-circle"></i></a>
                     </div>
                 </div>
                 <!-- Menu List Ends-->

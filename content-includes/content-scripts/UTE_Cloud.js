@@ -10,15 +10,15 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
         var popMessageStyles = 'font-size:1em; margin-bottom: -10px; background-color: #1449a3; color: #fcfcfc; top: calc('+navHeight+' + 10px); bottom: unset;';
         //TODO: optimizing the loading using window.loaded array variable and storing the loading statuses in the same
         var rows = parseInt($('.page-size').html()) || 30;
-        setTimeout(function(){
+        setTimeout(async function(){
             for(var i = 0; i<rows; i++){
                 var endTime = $("tr[data-index='"+i+"'] td.cell-res_end .crop").html();
+                var URLPath = $("tr[data-index='"+i+"'] td.cell-uuid_or_id a").attr('href');
+
                 var detectAlarmId = null
                 if($("tr[data-index='"+i+"'] td.cell-type .crop audio").length > 0){
                     detectAlarmId = $("tr[data-index='"+i+"'] td.cell-type .crop audio").attr('id')
                 }
-                var timeLeft = getTimeLeft(endTime, detectAlarmId, userSettings) || NaN;
-                var URLPath = $("tr[data-index='"+i+"'] td.cell-uuid_or_id a").attr('href');
 
                 //Adding border-left && time left
                 //if($("tr[data-index='"+i+"'] td:first-child").find('.ext-indication').length == 0){
@@ -26,6 +26,10 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                     //console.log(status);
                     switch(status != undefined && status.toLowerCase()){
                         case "confirmed":
+                            var topology = $("tr[data-index='"+i+"'] td.cell-type .crop").html().split(' <span')[0];
+                            var tl_name = $("tr[data-index='"+i+"'] td.cell-type .crop .tl-name").html() || '';
+                            var tl_start = $("tr[data-index='"+i+"'] td.cell-res_start .crop").html() || '';
+                            var timeLeft = await getTimeLeft(endTime, detectAlarmId, `https://cloud.ute.nsn-rdnet.net${URLPath}`, topology, tl_name, tl_start, userSettings) || "";
                             if($("#table tr[data-index='"+i+"'] td.cell-type .crop").has('.time-left').length){
                                 $("#table tr[data-index='"+i+"'] td.cell-type .crop .time-left").html(timeLeft+'</span>');
                             }else{
@@ -35,7 +39,8 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                                 $("#table tr[data-index='"+i+"'] td.cell-type .crop .time-left").css({"background-color" : "orange"});
                             }
                             $('#table tr[data-index='+i+'] td:nth-child(1)').css({"border-left": "3px solid #10bb1a"});
-                            $("#table tr[data-index='"+i+"'] td.cell-type .crop").append("<audio muted='muted' autoplay='' id='audio-"+URLPath.split('/')[2]+"' type='audio/mpeg'></audio>")
+                            if($("#table tr[data-index='"+i+"'] td.cell-type .crop").find('audio').length == 0)
+                                $("#table tr[data-index='"+i+"'] td.cell-type .crop").append("<audio muted='muted' autoplay='' id='audio-"+URLPath.split('/')[2]+"' type='audio/mpeg'></audio>")
                             break;
                         case "pending for testline":
                         case "testline assigned":
@@ -82,11 +87,11 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                                 //break;
                             }
                         }
-
+                        var tlName = ''
                         if($("#table tr[data-index='"+i+"'] td.cell-type .crop").has('.tl-name').length == 0){
                             for(var k = dom_nodes.find("#menu-1>div.resource-property-indent-wrapper>a").length-1; k>=0; k--){
                                 if(dom_nodes.find("#menu-1>div.resource-property-indent-wrapper>a").eq(k).children(".resource-key-label").html() == "name"){
-                                    var tlName = dom_nodes.find("#menu-1>div.resource-property-indent-wrapper>a").eq(k).html();
+                                    tlName = dom_nodes.find("#menu-1>div.resource-property-indent-wrapper>a").eq(k).html();
                                     tlName = tlName.split("</span>: ")[1] || NaN;
                                     //console.log(tlName);
                                     $("#table tr[data-index='"+i+"'] td.cell-type .crop").append(' <span class="tl-name ext-elm-tag">'+tlName+'</span>');
@@ -122,23 +127,13 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                                     $("#table tr[data-index='"+i+"'] td.cell-uuid_or_id .copy-ip-address").on("click", function(){
                                         extExecCopy(ipAddr+" || "+tl_pwd)
                                         sendMessage("VM IP Address & Password Copied!", "body", popMessageStyles);
+
                                     })
                                     //return;
                                 }
                                 //console.log(k);
-                            }
-                            
-                            
+                            }     
                         }
-
-                        //5/10 - Testlines reservation progress
-                        // dom_nodes.find('#reservation_progress table.progress-table tbody>tr>td.td_position').each(function(){
-                        //     if($(this).children('div').hasClass('grey')){
-                        //         console.log("Grey bar Detected!")
-                        //     } 
-                        // })
-
-                        
                     }
                     if(URLPath != undefined && URLPath != null && URLPath != '') onCommit(URL, i, status);
                 }
@@ -218,18 +213,6 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                                     reportStatus = 'green'
                                     reportURL = $(this).find('td').eq(1).find('a').attr('href')
                                 }
-                                // else{
-                                    // let repPortalUrl = $(this).find('td').eq(1).find('a').attr('href')
-                                    // if(repPortalUrl){
-                                    //     // console.log(`https://rep-portal.wroclaw.nsn-rdnet.net/api/at/reports/report/?fields=no,details_url,file_hash,qc_match,qc_sent&file_hash__in=${getSearchParam(repPortalUrl.split('?')[1], 'zip')}&timestamp_db=30`)
-                                    //     // const Json = await getWebContent(repPortalUrl)
-                                    //     // console.log(Json)
-                                    //     // if(Json.results.length() && Json.results[0].qc_sent){}
-                                    //     if(Json.results.length() && Json.results[0].qc_sent){
-                                    //         owner += " <span class='green-tag ext-elm-tag owner-cloud-reg' title='Reported'>R</span>"
-                                    //     }
-                                    // }else 
-                                // }
                                 return false    
                             }
                         })
@@ -252,14 +235,6 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                             }
                         })
 
-
-                        // const logData = `https://${logsUrl.split('//')[1]}`
-                        // console.log(logData)
-                        // const response = await fetch(logData)
-                        // console.log(await response.text())
-                        // const webContent = fetch(logData)
-                        // .then(response => response.text())
-                        // .then(data => console.log(data));
 
                         var plural = (totalCases > 1) ? "s" : "";
                         var output = ''
@@ -292,7 +267,7 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
 
     var userSettings = null
     chrome.storage.sync.get(["nokiaUserSettings"], function(data){
-        if(data.nokiaUserSettings){
+        if(data.hasOwnProperty('nokiaUserSettings')){
             userSettings = JSON.parse(data.nokiaUserSettings)
             if(window.location.pathname == "/user/reservations"){
                 $('#table').ready(function(){
@@ -324,29 +299,6 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                         })
                     }, 1000)
                 })
-                // $('#table').ready(function(){
-                //     var x = setInterval(function(){
-                //         if($('#table tbody tr td.cell-type').length > 0){
-                //             setTimeout(function(){
-                //                 setTimeout(function(){window.load = true}, 20000)
-                //                 updateUteCloudPage(userSettings)
-                //                 //On Page Click
-                //                 $('ul.pagination li').on('click', function(){
-                //                     window.load = false
-                //                     x = setInterval(function(){
-                //                         if($('#table tbody tr td.cell-type').length > 0){
-                //                             setTimeout(function(){
-                //                                 setTimeout(function(){window.load = true}, 20000)
-                //                                 updateUteCloudPage(userSettings)
-                //                             }, 500)
-                //                             clearInterval(x)
-                //                         }
-                //                     }, 500);
-                //                 })
-                //             }, 500)
-                //             clearInterval(x)
-                //         }
-                //     }, 500);
 
                 var y = setInterval(function(){
                     updateUteCloudPage(userSettings)
@@ -367,19 +319,6 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                                 //New: window, old: 'ul.pagination li, #search_button'
                                 $(window).on('click', function(){
                                     var x = setInterval(function(){
-                                        // setTimeout(function(){
-                                        //     $('ul.pagination li, #search_button').on('click', function(){
-                                        //         var x = setInterval(function(){
-                                        //             console.log("interval execution...")
-                                        //             if($('.fixed-table-loading').css('display') == 'none'){
-                                        //                 setTimeout(function(){
-                                        //                     loadExecutionStatus(userSettings)
-                                        //                 }, 1000)
-                                        //                 clearInterval(x)
-                                        //             }
-                                        //         }, 1000);
-                                        //     })
-                                        // },1000)
                                         if($('.fixed-table-loading').css('display') == 'none'){
                                             setTimeout(function(){
                                                 loadExecutionStatus(userSettings)
@@ -426,37 +365,5 @@ if(window.location.hostname == "cloud.ute.nsn-rdnet.net"){
                 })
             }
         }
-
-        // // Appending log links in execution page
-        // if(window.location.pathname.includes("/execution/") && window.location.pathname.includes("/show")){
-        //     $('table.table tbody tr').each(async function(index){
-        //         if($(this).find('td:nth-child(1)').html() == "Logs"){
-        //             let baseUrl = $(this).find('td:nth-child(2)>a').attr('href');
-        //             // baseUrl = baseUrl.replace("http:", "https:")
-        //             // console.log(baseUrl)
-        //             baseUrl = "https://logs.ute.nsn-rdnet.net/cloud/execution/13440098/"
-
-        //             // async function get_web_content_in_dom(URL){
-        //             //     let htmlContent = await getWebContent(URL);
-        //             //     return $($.parseHTML(htmlContent));
-        //             // }
-        //             // var logsPage1_dom = get_web_content_in_dom(baseUrl)
-                    
-        //             let htmlContent = await getWebContent(baseUrl);
-        //             // console.log(htmlContent)
-        //             var logsPage1_dom =  $($.parseHTML(htmlContent));
-
-        //             logsPage1_dom.find('pre>a').each(function(){
-        //                 console.log("Hello, Printing...")
-        //                 if(($(this).attr('href')).includes('execution_')){
-        //                     alert($(this).attr('href'))
-        //                 }
-        //             })
-
-        //             return;
-        //         }
-        //     })
-        // }
     })
-
 }

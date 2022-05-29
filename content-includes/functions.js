@@ -19,7 +19,19 @@ function playSound(type, warningAudioId) {
         //console.log("Audio Detected!");
         audio.muted = false;
         // audio.autoplay = true;
-        audio.play();
+        try {
+            audio.play();
+        }
+        catch(err){}
+    }
+}
+
+const webRequest = (url) => {
+    const Http = new XMLHttpRequest();
+    Http.open("GET", url);
+    Http.send();
+    Http.onreadystatechange = (e) => {
+        // console.log('')
     }
 }
 
@@ -36,16 +48,7 @@ function getDuration(endDate){
     return days+":"+hrs+":"+mins+":"+secs;
 }
 
-// function getLocalStorage(){
-//     chrome.storage.sync.get(["nokiaUserSettings"], function(data){
-//         var userSettings = JSON.parse(data.nokiaUserSettings)
-//         userSettings.uteReservations.isIdFiledExtended = true
-//         console.log(userSettings);
-//     })
-// }
-
-
-function getTimeLeft(endDate, warningAudioId, userSettings){
+async function getTimeLeft(endDate, warningAudioId, reservation_url, topology, tl_name, tl_start, userSettings){
     var timeLeft = getDuration(endDate, warningAudioId); //30 Nov 2021, 00:23:10 am
     //var days = parseInt(timeLeft.split(":")[0]);
     var hrs = parseInt(timeLeft.split(":")[1]);
@@ -82,6 +85,73 @@ function getTimeLeft(endDate, warningAudioId, userSettings){
         }
     }
 
+    //Automatic Reservation Extender
+    if(userSettings.uteCloud.autoExtendTestlineRes){
+        if(hrs <= 2){
+            if(mins == 55 || mins == 40 || mins == 30){ //mins >= 0
+                if( secs == 40 || secs == 41){ //secs < 10 || (secs>30 && secs<=40)               
+                    let ext_dur = (hrs == 1) ? '120' : (hrs == 0) ? '180' : '60' // Settings up extension duration possibility
+                    const extension_url = reservation_url.replace('/show', '')+'/extend/'+ext_dur
+                    const resId = reservation_url.split('/')[4]
+                    //Only one TL is triggered.
+                    // console.log(topology + " --> "+hrs+":"+mins+":"+secs)
+                    const response = await fetch(extension_url, {method: 'GET'})
+                    const htmlResp = await response.text()
+                    const status = $($.parseHTML(htmlResp)).find('.django-message.alert .django-message-content-container').html()
+                    // console.log('status: '+status)
+                    const logInfo = {
+                        res_id: resId,
+                        instances: [
+                            {
+                                ext_dur: (ext_dur == '180') ? '3Hrs' : (ext_dur == '120') ? '2Hrs' : '1Hr',
+                                time: Date.now(),
+                                status
+                            }
+                        ],
+                        booked_time: tl_start,
+                        tl_name,
+                        topology
+                    }
+                    // // chrome.storage.local.remove(["ntptTlResData"], function(){}) //Turn this on to loose all the logs.
+                    chrome.storage.local.get(["ntptTlResData"], function(data){
+                        if(!data.hasOwnProperty('ntptTlResData')){
+                            chrome.storage.local.set({ "ntptTlResData": JSON.stringify({"logs":[logInfo]})}, function(){});
+                        }else{
+                            var logs = JSON.parse(data.ntptTlResData).logs
+                            if(logs.length > 15) logs = logs.slice(0, 14)
+                            var res_exists = false
+                            logs = logs.map(log => {
+                                if(log.res_id === resId){
+                                    res_exists = true
+                                    if(log.tl_name == ""){
+                                        return {...log, "instances": [...log.instances, logInfo.instances[0]], "tl_name": logInfo.tl_name}
+                                    }
+                                    return {...log, "instances": [...log.instances, logInfo.instances[0]]}
+                                }
+                                return log
+                            })
+                            if(res_exists == false){
+                                chrome.storage.local.set({ "ntptTlResData": JSON.stringify({"logs":[logInfo, ...logs]})}, function(){});
+                            }else
+                                chrome.storage.local.set({ "ntptTlResData": JSON.stringify({"logs":logs})}, function(){});
+                        }
+                    })
+
+                    //reload the page. If the tl_ext is successful
+                    if(status.includes('success')){
+                        setTimeout(() => {
+                            document.location.reload()
+                        }, 30000)
+                    }
+                    
+                    // chrome.storage.local.get(["ntptTlResData"], function(data){
+                    //     if(data.ntptTlResData)console.log(JSON.parse(data.ntptTlResData))
+                    // })
+                }
+            }
+        }
+    }
+
     if(hrs==0 && mins == 0)
         return secs+"<span style='"+styles+"'>sec</span> "+comment;
     if(hrs == 0){
@@ -93,10 +163,9 @@ function getTimeLeft(endDate, warningAudioId, userSettings){
     //+ secs + "<span style='"+styles+"'>sec</span> "
 }
 
-
 async function getWebContent(URL) {
     try{
-        const response = await fetch(URL, {}).then(res => res).then(data => data) // type: Promise<Response>
+        const response = await fetch(URL, {method:'GET'}).then(res => res).then(data => data) // type: Promise<Response>
         if (!response.ok) {
             //throw Error(response.statusText)
             //console.log("failed to load!");

@@ -27,14 +27,26 @@ if(window.location.hostname == repPortalHostName){
                 //team progress btn exists
             //}else{
                 //norun || passed || failed
+                let api_url = new URL(reqApiUrl)
+                let res_tester = null;
+                if(api_url.searchParams.has('res_tester__username_full_name__pos_neg')){
+                    res_tester = getSearchParam(api_url.searchParams, 'res_tester__username_full_name__pos_neg')
+                    api_url.searchParams.delete('res_tester__username_full_name__pos_neg');
+                }
                 var casesStatus = params.has('cit_id') ? 'CIT' : params.has('tep_status_norun') ? "no run" : params.has("tep_status_passed") ? "passed" : params.has("tep_status_failed") ? "failed" : "";
                 var casesStatusClassName = (casesStatus == "no run") ? "no-run" : (casesStatus == "passed") ? "passed" : (casesStatus == "failed") ? "failed" : "unknownn";
 
                 $(insertionElm).css('display', 'flex')
-                var statsHTML = await get_TC_Stats(reqApiUrl, userSettings)
-                statsHTML = statsHTML.replace('<tbody>', '')
-                statsHTML = statsHTML.replace('</tbody>', '')
-                
+                var statsHTML = await get_TC_Stats(api_url.href, userSettings)
+
+                var statsHTML_DOM = $($.parseHTML(statsHTML));
+                statsHTML_DOM.find('tr').each(function() {
+                    if(res_tester && $(this).find('td.tester-name').html().includes(res_tester)){
+                        $(this).css({'background-color': '#4c7ee6', 'color': '#fcfcfc'});
+                        return false
+                    }
+                })
+
                 if($(insertionElm).find(".ext-wrapper#team-progress").length == 0){
                     $(insertionElm).append(`<div class='ext-wrapper' id='team-progress' style='order:2'>
                                                             <div class='report-stats'>
@@ -50,9 +62,7 @@ if(window.location.hostname == repPortalHostName){
                                                                                     <th>TC Count</th>
                                                                                 </tr>
                                                                             </thead>
-                                                                            <tbody>
-                                                                                ${statsHTML}
-                                                                            </tbody>
+                                                                            ${statsHTML_DOM.html()}
                                                                         </table>
                                                                     </div>
                                                                 </div>
@@ -183,7 +193,7 @@ if(window.location.hostname == repPortalHostName){
     var userSettings = null
     chrome.storage.sync.get(["nokiaUserSettings"], function(data){
         // var data = {nokiaUserSettings:{}}
-        if(data.nokiaUserSettings){
+        if(data.hasOwnProperty('nokiaUserSettings')){
             userSettings = JSON.parse(data.nokiaUserSettings)
             function repPortalPageInit(load){
                 //Tests to analyze feature
