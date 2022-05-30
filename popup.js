@@ -56,7 +56,7 @@ $('#view_tl_ext_logs').on("click", function() {
     chrome.storage.local.get(["ntptTlResData"], function(data){
         if(data.hasOwnProperty('ntptTlResData')){
             const logs = JSON.parse(data.ntptTlResData)
-            if(logs.logs){
+            if(logs.logs && logs.logs.length > 0){
                 logs.logs.forEach(log => {
                     output += `<div class="log-item-container">`
                      output += `
@@ -98,25 +98,24 @@ $('#view_tl_ext_logs').on("click", function() {
             output = "<div style='text-align:center'>No logs yet.</div>"
         }
         setTimeout(() => {
-            $('#tl-ext-logs .logs-list').html(output)
-        }, 300)
-        
+            $('#tl-ext-logs .logs-list').html(output);
 
-        $('.log-delete-btn').on('click', function(logs){
-            if(confirm("Do you really want to delete this log?")){
-                var res_id = $(this).attr('id').replace('delete-log-', '')
-                console.log(res_id)
-                chrome.storage.local.get(["ntptTlResData"], function(data){
-                    if(data.hasOwnProperty('ntptTlResData')){
-                        var logs = JSON.parse(data.ntptTlResData).logs
-                        var newLogs = logs.filter(log => log.res_id !== res_id)
-                        console.log(newLogs)
-                        chrome.storage.local.set({ "ntptTlResData": JSON.stringify({"logs":newLogs})}, function(){});
-                        $('#view_tl_ext_logs').click()
-                    }
-                })
-            }
-        })
+            $('.log-delete-btn').on('click', function(){
+                if(confirm("Do you really want to delete this log?")){
+                    var res_id = $(this).attr('id').replace('delete-log-', '')
+                    // console.log(res_id)
+                    chrome.storage.local.get(["ntptTlResData"], function(data){
+                        if(data.hasOwnProperty('ntptTlResData')){
+                            var logs = JSON.parse(data.ntptTlResData).logs
+                            var newLogs = logs.filter(log => log.res_id !== res_id)
+                            console.log(newLogs)
+                            chrome.storage.local.set({ "ntptTlResData": JSON.stringify({"logs":newLogs})}, function(){});
+                            $('#view_tl_ext_logs').click()
+                        }
+                    })
+                }
+            })
+        }, 300)
     })
 })
 
