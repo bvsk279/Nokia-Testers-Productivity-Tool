@@ -10,6 +10,8 @@ if(window.location.hostname == repPortalHostName){
     //norun
     //https://rep-portal.wroclaw.nsn-rdnet.net/api/qc-beta/instances/report/?fields=res_tester&id__in=%3Ahash%3Acd36ef7a991d4c2986d63987cf6f8566&tep_status__norun=%3Ahash%3Acd36ef7a991d4c2986d63987cf6f8566
     //https://rep-portal.wroclaw.nsn-rdnet.net/reports/qc/?id=%3Ahash%3Acd36ef7a991d4c2986d63987cf6f8566&tep_status_norun=%3Ahash%3Acd36ef7a991d4c2986d63987cf6f8566
+
+    // https://rep-portal.wroclaw.nsn-rdnet.net/api/qc-beta/instances/report/?build=SBTS22R2_ENB_0000_001564_000013&fields=res_tester&id__in=%3Ahash%3A564f8d24be498fdca4ee0c46e8e0abc4&limit=25&organization__pos_neg=RAN_L2_SW_BLR_2_Dev6SG&wall_status=-passed%2C-failed
     
 
     //cit_id
@@ -25,7 +27,7 @@ if(window.location.hostname == repPortalHostName){
 
             if(reqApiUrl){
                 //team progress btn exists
-            //}else{
+            // }else{
                 //norun || passed || failed
                 let api_url = new URL(reqApiUrl)
                 let res_tester = null;

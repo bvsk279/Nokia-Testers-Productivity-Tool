@@ -62,7 +62,7 @@ $('#view_tl_ext_logs').on("click", function() {
                      output += `
                         <div class="log-head">
                             <div class="row1">
-                                <div title='${(log.topology.length > 15) ? log.topology : ''}'>${log.topology.slice(0, 14)}${(log.topology.length > 15) ? `...` : ``}</div>
+                                <div title="${(log.topology.length > 15) ? log.topology : ''}">${log.topology.slice(0, 14)}${(log.topology.length > 15) ? `...` : ``}</div>
                                 <div>${log.tl_name}</div>
                             </div>
                             <div class="row2">
@@ -78,8 +78,8 @@ $('#view_tl_ext_logs').on("click", function() {
                                 <th>Ext status</th>
                             </tr>`
                     log.instances.forEach((instance, index) => {
-                        const status = instance.status.includes('success') ? `<span class='green-clr' title='${instance.status}'>Success</span>` 
-                            : `<span class='red-clr' title='${instance.status}'>Failed</span>` 
+                        const status = instance.status.includes('success') ? `<span class='green-clr' title="${instance.status}">Success</span>` 
+                            : `<span class='red-clr' title="${instance.status}">Failed</span>` 
                         output += `
                             <tr>
                                 <td>&ensp;${index+1}&ensp;</td>
