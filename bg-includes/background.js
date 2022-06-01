@@ -1,7 +1,7 @@
 // console.log("Background script is running...");
 
 chrome.runtime.onInstalled.addListener(function() {
-    //Setting the local data
+    //Setting up local storage
     const newNokiaUserSettings = {
       "userData":{
           "userName": "",
@@ -51,14 +51,23 @@ chrome.runtime.onInstalled.addListener(function() {
 });
 
 
+chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+  // changeInfo object: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/onUpdated#changeInfo
+  // status is more reliable (in my case)
+  // console.log(JSON.stringify(changeInfo)) //" to check what's available and works in your case
+  if (changeInfo.status === 'complete') {
+    chrome.tabs.sendMessage(tabId, {message: 'TabUpdated'}, function(response){
+      if(response) console.log("Success")
+    });
+  }
+})
+
 //Team Progress Feature
 chrome.webRequest.onBeforeRequest.addListener(function(details) { 
   if(details.url.includes('/api/') && details.url.includes('/report') && details.url.includes('fields=') && !details.url.includes('extension_request=true')){
-    console.log(details.url);
-    
+    // console.log(details.url);
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
-      // console.log(tabs)
-      
+
       var port = chrome.tabs.connect(tabs[0].id, {name:"apiWebRequest"});
       port.postMessage({
         url: details.url
@@ -70,7 +79,6 @@ chrome.webRequest.onBeforeRequest.addListener(function(details) {
 {urls: ["*://rep-portal.wroclaw.nsn-rdnet.net/*"]},
 ["requestBody"]
 );
-
 
 
 // https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest/

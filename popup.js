@@ -115,7 +115,7 @@ $('#view_tl_ext_logs').on("click", function() {
                     })
                 }
             })
-        }, 300)
+        }, 100)
     })
 })
 

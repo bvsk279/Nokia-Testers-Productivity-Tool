@@ -12,4 +12,9 @@ A Browser Extention tool developed for Nokia Testers to enhance the user experia
 
 ## v2.2.0 Update:
 1. Automatic Extension UTE Testline Reservation in Background!
-2. Enhancement in Team Progress Feature - Tester Name Filter is removed to display all testes in any RP reports pag
+2. Enhancement in Team Progress Feature - Tester Name Filter is removed to display all testes in any RP reports page
+
+## v2.3.0 Update:
+1. Team Progress - Maintenance Activity Done
+2. Enhancement of Automatic Extension of UTE Testline reservations Feature
+3. Finishing Touches from the Inventor of this Tool - "Good Luck to New Developers" from the inventor, SivaKrishna BV :)

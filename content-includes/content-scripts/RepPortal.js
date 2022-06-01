@@ -25,94 +25,98 @@ if(window.location.hostname == repPortalHostName){
             const insertionElm = '.navbar-container .rep-title'
             var params = new URLSearchParams(searchParams)
 
-            if(reqApiUrl){
-                //team progress btn exists
-            // }else{
-                //norun || passed || failed
-                let api_url = new URL(reqApiUrl)
-                let res_tester = null;
-                if(api_url.searchParams.has('res_tester__username_full_name__pos_neg')){
-                    res_tester = getSearchParam(api_url.searchParams, 'res_tester__username_full_name__pos_neg')
-                    api_url.searchParams.delete('res_tester__username_full_name__pos_neg');
-                }
-                var casesStatus = params.has('cit_id') ? 'CIT' : params.has('tep_status_norun') ? "no run" : params.has("tep_status_passed") ? "passed" : params.has("tep_status_failed") ? "failed" : "";
-                var casesStatusClassName = (casesStatus == "no run") ? "no-run" : (casesStatus == "passed") ? "passed" : (casesStatus == "failed") ? "failed" : "unknownn";
+            // console.log("calling Team progress..")
 
-                $(insertionElm).css('display', 'flex')
-                var statsHTML = await get_TC_Stats(api_url.href, userSettings)
-
-                var statsHTML_DOM = $($.parseHTML(statsHTML));
-                statsHTML_DOM.find('tr').each(function() {
-                    if(res_tester && $(this).find('td.tester-name').html().includes(res_tester)){
-                        $(this).css({'background-color': '#4c7ee6', 'color': '#fcfcfc'});
-                        return false
+            // setTimeout(() => {
+                if(reqApiUrl){
+                    //team progress btn exists
+                // }else{
+                    //norun || passed || failed
+                    let api_url = new URL(reqApiUrl)
+                    let res_tester = null;
+                    if(api_url.searchParams.has('res_tester__username_full_name__pos_neg')){
+                        res_tester = getSearchParam(api_url.searchParams, 'res_tester__username_full_name__pos_neg')
+                        api_url.searchParams.delete('res_tester__username_full_name__pos_neg');
                     }
-                })
+                    var casesStatus = params.has('cit_id') ? 'CIT' : params.has('tep_status_norun') ? "no run" : params.has("tep_status_passed") ? "passed" : params.has("tep_status_failed") ? "failed" : "";
+                    var casesStatusClassName = (casesStatus == "no run") ? "no-run" : (casesStatus == "passed") ? "passed" : (casesStatus == "failed") ? "failed" : "unknownn";
 
-                if($(insertionElm).find(".ext-wrapper#team-progress").length == 0){
-                    $(insertionElm).append(`<div class='ext-wrapper' id='team-progress' style='order:2'>
-                                                            <div class='report-stats'>
-                                                                <div class='stats-view-btn ext-action-btn'>Team&nbsp;Progress&ensp;<i class='fas fa-chart-bar'></i></div>
-                                                                <div class='stats-viewer'>
-                                                                    <div class="cases-type ${casesStatusClassName}"><span>${casesStatus} <span style="font-size: 0.9em">TC's</span></span><span></span><button class='refresh-btn'><i class="fas fa-sync-alt"></i>&ensp;Refresh</button></div>
-                                                                    <div class="stats-wrapper">
-                                                                        <table class="stats-table">
-                                                                            <thead>
-                                                                                <tr>
-                                                                                    <th>&emsp;</th>
-                                                                                    <th>Responsible Tester</th>
-                                                                                    <th>TC Count</th>
-                                                                                </tr>
-                                                                            </thead>
-                                                                            ${statsHTML_DOM.html()}
-                                                                        </table>
+                    $(insertionElm).css('display', 'flex')
+                    var statsHTML = await get_TC_Stats(api_url.href, userSettings)
+
+                    var statsHTML_DOM = $($.parseHTML(statsHTML));
+                    statsHTML_DOM.find('tr').each(function() {
+                        if(res_tester && $(this).find('td.tester-name').html().includes(res_tester)){
+                            $(this).css({'background-color': '#4c7ee6', 'color': '#fcfcfc'});
+                            return false
+                        }
+                    })
+
+                    if($(insertionElm).find(".ext-wrapper#team-progress").length == 0){
+                        $(insertionElm).append(`<div class='ext-wrapper' id='team-progress' style='order:2'>
+                                                                <div class='report-stats'>
+                                                                    <div class='stats-view-btn ext-action-btn'>Team&nbsp;Progress&ensp;<i class='fas fa-chart-bar'></i></div>
+                                                                    <div class='stats-viewer'>
+                                                                        <div class="cases-type ${casesStatusClassName}"><span>${casesStatus} <span style="font-size: 0.9em">TC's</span></span><span></span><button class='refresh-btn'><i class="fas fa-sync-alt"></i>&ensp;Refresh</button></div>
+                                                                        <div class="stats-wrapper">
+                                                                            <table class="stats-table">
+                                                                                <thead>
+                                                                                    <tr>
+                                                                                        <th>&emsp;</th>
+                                                                                        <th>Responsible Tester</th>
+                                                                                        <th>TC Count</th>
+                                                                                    </tr>
+                                                                                </thead>
+                                                                                ${statsHTML_DOM.html()}
+                                                                            </table>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
-                                                            </div>
-                                                        </div>`
-                    );
-                    //const header = $('.top-panel .view-title')
-                    if(userSettings.repPortal.isTeamProgressOpen != true)
-                        $(insertionElm+" .ext-wrapper#team-progress .report-stats .stats-viewer").hide();
-                    $(insertionElm+' .ext-wrapper#team-progress .report-stats .stats-view-btn').on("click", (event) => {
-                        // console.log("Team progress click detected")
-                        event.stopPropagation();
-                        $(insertionElm+" .ext-wrapper#team-progress .report-stats .stats-viewer").toggle();
-
-                        //Setting Team Progress Visibility
-                        if($(insertionElm+' .ext-wrapper#team-progress .report-stats .stats-viewer').is(":visible") == true){
-                            toogleTeamProgress(true)
-                        }else toogleTeamProgress(false)
-
-                    })
-                    $(insertionElm+" .ext-wrapper#team-progress .report-stats .stats-viewer").on("click", (event) => {
-                        event.stopPropagation();
-                    })
-
-                    $(window).click(() => {
-                        if($(insertionElm+' .ext-wrapper#team-progress .report-stats .stats-viewer').is(":visible") == true){
+                                                            </div>`
+                        );
+                        //const header = $('.top-panel .view-title')
+                        if(userSettings.repPortal.isTeamProgressOpen != true)
                             $(insertionElm+" .ext-wrapper#team-progress .report-stats .stats-viewer").hide();
-                            toogleTeamProgress(false)
-                        }
-                    });
-                    
-                    $('.stats-viewer .refresh-btn').on('click', function(){
-                        location.reload();
-                    })
-                }else{
-                    $(insertionElm).find(".ext-wrapper#team-progress .stats-viewer table tbody").html(statsHTML);
-                }
-                
+                        $(insertionElm+' .ext-wrapper#team-progress .report-stats .stats-view-btn').on("click", (event) => {
+                            // console.log("Team progress click detected")
+                            event.stopPropagation();
+                            $(insertionElm+" .ext-wrapper#team-progress .report-stats .stats-viewer").toggle();
 
-                //Click res tester to filter his/her cases
-                $(insertionElm+' .ext-wrapper#team-progress .report-stats .stats-viewer table tbody tr td.tester-name').on("click", function(e){
-                    var respTester = $(this).html();
-                    const url = new URL(window.location);
-                    url.searchParams.set('res_tester', respTester);
-                    window.history.pushState({}, '', url);
-                    location.reload()
-                })
-            }
+                            //Setting Team Progress Visibility
+                            if($(insertionElm+' .ext-wrapper#team-progress .report-stats .stats-viewer').is(":visible") == true){
+                                toogleTeamProgress(true)
+                            }else toogleTeamProgress(false)
+
+                        })
+                        $(insertionElm+" .ext-wrapper#team-progress .report-stats .stats-viewer").on("click", (event) => {
+                            event.stopPropagation();
+                        })
+
+                        $(window).click(() => {
+                            if($(insertionElm+' .ext-wrapper#team-progress .report-stats .stats-viewer').is(":visible") == true){
+                                $(insertionElm+" .ext-wrapper#team-progress .report-stats .stats-viewer").hide();
+                                toogleTeamProgress(false)
+                            }
+                        });
+                        
+                        $('.stats-viewer .refresh-btn').on('click', function(){
+                            location.reload();
+                        })
+                    }else{
+                        $(insertionElm).find(".ext-wrapper#team-progress .stats-viewer table tbody").html(statsHTML);
+                    }
+                    
+
+                    //Click res tester to filter his/her cases
+                    $(insertionElm+' .ext-wrapper#team-progress .report-stats .stats-viewer table tbody tr td.tester-name').on("click", function(e){
+                        var respTester = $(this).html();
+                        const url = new URL(window.location);
+                        url.searchParams.set('res_tester', respTester);
+                        window.history.pushState({}, '', url);
+                        location.reload()
+                    })
+                }
+            // }, 1000)
         }
 
 
@@ -263,6 +267,7 @@ if(window.location.hostname == repPortalHostName){
                     var load = false;
                     repPortalPageInit(load);
                 }
+                sendResponse({status: 'ok'});
             })
 
             //Team Progress Feature
