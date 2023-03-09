@@ -1,4 +1,4 @@
-const repPortalHostName = "rep-portal.wroclaw.nsn-rdnet.net";
+const repPortalHostName = "rep-portal.ext.net.nokia.com";
 window.isLoading = false;
 
 if(window.location.hostname == repPortalHostName){
