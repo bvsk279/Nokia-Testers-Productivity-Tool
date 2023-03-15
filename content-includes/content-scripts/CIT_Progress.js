@@ -1,7 +1,7 @@
 //api: https://rep-portal.wroclaw.nsn-rdnet.net/api/charts/cit_build_progress/?ca__pos_neg=%22RAN_L2_SW_BLR_2%22&from=2021-11-20&promotion__pos_neg=%22CIT%22&swbranch=SRAN+SBTS00+COMMON&to=2021-12-15
 
 //CIT Individual report: https://rep-portal.wroclaw.nsn-rdnet.net/api/qc-beta/instances/report/?build=SBTS00_ENB_9999_211213_000005&cit_id=:hash:55d5f8933c916e93ea03f743159ea204&fields=res_tester&limit=1000
-const uteHostName = "https://rep-portal.wroclaw.nsn-rdnet.net";
+const uteHostName = "https://rep-portal.ext.net.nokia.com";
 
 async function getGroupHtml(url, className, title, userSettings){
     var params = url.split('?')[1]
