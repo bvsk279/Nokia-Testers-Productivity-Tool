@@ -3,7 +3,7 @@
     "manifest_version": 3,
     "name": "Nokia Testers Productivity Tool",
     "description": "Enhance your productivity working with Reporting Portal & UTE Cloud Manager.",
-    "version": "2.3.0",
+    "version": "2.3.1",
     "icons": {
         "16": "icons/favicon-16.png",
         "24": "icons/favicon-24.png",
@@ -24,15 +24,15 @@
     "host_permissions": [
         "*://*.wroclaw.nsn-rdnet.net/*",
         "*://*.ute.nsn-rdnet.net/*",
-        "*://www.zopamo.com/*",
-        "https://cdnjs.cloudflare.com/*"
+        "*://*.rep-portal.ext.net.nokia.com/*"
       ],
     "content_scripts": [
         {
             "css": ["fontawesome.min.css","content-includes/content-styles.css"],
             "matches": [
                 "*://*.wroclaw.nsn-rdnet.net/*",
-                "*://*.ute.nsn-rdnet.net/*"
+                "*://*.ute.nsn-rdnet.net/*",
+                "*://*.rep-portal.ext.net.nokia.com/*"
             ],
             "run_at": "document_idle",
             "js": [
